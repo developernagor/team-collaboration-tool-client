@@ -26,10 +26,10 @@ function Navbar() {
   const navMenu = (
     <>
       <Link to="/">Home</Link>
-      <Link to="/about">About</Link>
+      
       <Link to="/message">Message</Link>
-      <Link to="/register">Register</Link>
-      <Link to="/login">Login</Link>
+      
+      
     </>
   );
 
@@ -45,7 +45,11 @@ function Navbar() {
           </ul>
         </div>
 
-        <a className="btn btn-ghost text-xl">TEAM FLUX</a>
+       <Link to="/" className="btn btn-ghost text-2xl font-bold">
+  <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text tracking-widest">
+    ARU
+  </span>
+</Link>
       </div>
 
       <div className="navbar-center hidden lg:flex">

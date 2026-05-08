@@ -48,7 +48,7 @@ function Register() {
       });
 
       // 3. Save user to MongoDB
-      await fetch("http://localhost:5000/users", {
+      await fetch("https://team-collaboration-tool-server.vercel.app/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

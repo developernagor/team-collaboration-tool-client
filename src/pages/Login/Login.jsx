@@ -3,7 +3,7 @@ import loginLottie from "../../assets/loginLottie.json"
 import Lottie from 'lottie-react'
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/firebase.config';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 
 function Login() {
@@ -62,6 +62,17 @@ function Login() {
           <button className="btn btn-neutral mt-4" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
         </fieldset>
       </form>
+      <div className="text-center mt-4 space-y-2">
+  <p className="text-sm text-gray-500">
+    Don’t have an account yet?
+  </p>
+
+  <Link to="/register">
+    <button className="btn w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 hover:scale-[1.02] hover:shadow-lg transition-all duration-300">
+      Create New Account
+    </button>
+  </Link>
+</div>
     </div>
   </div>
 </div>
