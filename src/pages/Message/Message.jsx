@@ -101,6 +101,62 @@ function Message() {
     });
   }, [messages]);
 
+
+const markAsSeen = async (id) => {
+  if (!currentUser?.email) return;
+
+  try {
+    const res = await fetch(
+      `https://team-collaboration-tool-server.vercel.app/messages/seen/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          email: currentUser.email,
+          name:
+            currentUser.displayName ||
+            currentUser.email.split("@")[0],
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    console.log("Seen Response:", data);
+
+  } catch (err) {
+    console.log("Seen Error:", err);
+  }
+};
+
+useEffect(() => {
+  if (!currentUser?.email) return;
+
+  messages.forEach((msg) => {
+    // ✅ skip my own messages
+    if (msg.senderEmail === currentUser.email)
+      return;
+
+    // ✅ skip invalid ids
+    if (!msg._id || msg._id.length !== 24)
+      return;
+
+    // ✅ skip if already seen
+    const alreadySeen = msg.seenBy?.some(
+      (user) =>
+        user.email === currentUser.email
+    );
+
+    if (!alreadySeen) {
+      markAsSeen(msg._id);
+    }
+  });
+}, [messages, currentUser]);
+
+
   // =========================
   // SEND MESSAGE
   // =========================
@@ -121,17 +177,26 @@ function Message() {
 
     try {
       const messageData = {
-        text,
+  text,
 
-        senderName:
-          currentUser.displayName ||
-          currentUser.email.split("@")[0],
+  senderName:
+    currentUser.displayName ||
+    currentUser.email.split("@")[0],
 
-        senderEmail:
-          currentUser.email,
+  senderEmail: currentUser.email,
 
-        createdAt: new Date(),
-      };
+  createdAt: new Date(),
+
+  seenBy: [
+    {
+      email: currentUser.email,
+
+      name:
+        currentUser.displayName ||
+        currentUser.email.split("@")[0],
+    },
+  ],
+};
 
       const res = await fetch(
         "https://team-collaboration-tool-server.vercel.app/messages",
@@ -257,6 +322,41 @@ function Message() {
                         )
                       : ""}
                   </p>
+
+                  
+{/* SEEN STATUS */}
+{isMe && (
+  <div className="mt-1 text-right">
+    {msg.seenBy?.filter(
+      (user) =>
+        user.email !== currentUser?.email
+    ).length > 0 ? (
+      <div className="flex flex-wrap justify-end gap-1">
+        {msg.seenBy
+  ?.filter(user => user.email !== currentUser?.email)
+  .map((user, index) => (
+    <span
+      key={index}
+      className="text-[10px] bg-blue-400 px-2 py-[2px] rounded-full text-white"
+    >
+      {user.name} •{" "}
+      {user.seenAt
+        ? new Date(user.seenAt).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "Seen"}
+    </span>
+  ))}
+      </div>
+    ) : (
+      <p className="text-[10px] text-blue-100">
+        Sent
+      </p>
+    )}
+  </div>
+)}
+
                 </div>
               </div>
 
