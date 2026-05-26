@@ -6,11 +6,16 @@ import {
 } from "react";
 
 import { onAuthStateChanged } from "firebase/auth";
+
 import { auth } from "../../firebase/firebase.config";
 
 function Message() {
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(false);
+
   const [currentUser, setCurrentUser] =
     useState(null);
 
@@ -47,7 +52,8 @@ function Message() {
                 "application/json",
             },
             body: JSON.stringify({
-              email: currentUser.email,
+              email:
+                currentUser.email,
             }),
           }
         );
@@ -63,11 +69,12 @@ function Message() {
       30000
     );
 
-    return () => clearInterval(interval);
+    return () =>
+      clearInterval(interval);
   }, [currentUser]);
 
   // =========================
-  // FETCH MESSAGES
+  // FETCH LAST 10 MESSAGES
   // =========================
   const fetchMessages = useCallback(
     async () => {
@@ -76,10 +83,32 @@ function Message() {
           "https://team-collaboration-tool-server.vercel.app/messages"
         );
 
-        const data = await res.json();
+        const data =
+          await res.json();
+
+        const allMessages =
+          Array.isArray(data)
+            ? data
+            : [];
+
+        // ✅ Sort old → new
+        const sortedMessages =
+          allMessages.sort(
+            (a, b) =>
+              new Date(
+                a.createdAt
+              ) -
+              new Date(
+                b.createdAt
+              )
+          );
+
+        // ✅ Take last 10
+        const last10Messages =
+          sortedMessages.slice(-10);
 
         setMessages(
-          Array.isArray(data) ? data : []
+          last10Messages
         );
       } catch (err) {
         console.log(err);
@@ -90,72 +119,107 @@ function Message() {
 
   useEffect(() => {
     fetchMessages();
+
+    // optional auto refresh
+    const interval = setInterval(
+      fetchMessages,
+      3000
+    );
+
+    return () =>
+      clearInterval(interval);
   }, [fetchMessages]);
 
   // =========================
   // AUTO SCROLL
   // =========================
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [messages]);
-
-
-const markAsSeen = async (id) => {
-  if (!currentUser?.email) return;
-
-  try {
-    const res = await fetch(
-      `https://team-collaboration-tool-server.vercel.app/messages/seen/${id}`,
+    bottomRef.current?.scrollIntoView(
       {
-        method: "PATCH",
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify({
-          email: currentUser.email,
-          name:
-            currentUser.displayName ||
-            currentUser.email.split("@")[0],
-        }),
+        behavior: "smooth",
       }
     );
+  }, [messages]);
 
-    const data = await res.json();
+  // =========================
+  // MARK AS SEEN
+  // =========================
+  const markAsSeen = async (id) => {
+    if (!currentUser?.email) return;
 
-    console.log("Seen Response:", data);
+    try {
+      const res = await fetch(
+        `https://team-collaboration-tool-server.vercel.app/messages/seen/${id}`,
+        {
+          method: "PATCH",
 
-  } catch (err) {
-    console.log("Seen Error:", err);
-  }
-};
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
 
-useEffect(() => {
-  if (!currentUser?.email) return;
+          body: JSON.stringify({
+            email:
+              currentUser.email,
 
-  messages.forEach((msg) => {
-    // ✅ skip my own messages
-    if (msg.senderEmail === currentUser.email)
-      return;
+            name:
+              currentUser.displayName ||
+              currentUser.email.split(
+                "@"
+              )[0],
+          }),
+        }
+      );
 
-    // ✅ skip invalid ids
-    if (!msg._id || msg._id.length !== 24)
-      return;
+      const data =
+        await res.json();
 
-    // ✅ skip if already seen
-    const alreadySeen = msg.seenBy?.some(
-      (user) =>
-        user.email === currentUser.email
-    );
-
-    if (!alreadySeen) {
-      markAsSeen(msg._id);
+      console.log(
+        "Seen Response:",
+        data
+      );
+    } catch (err) {
+      console.log(
+        "Seen Error:",
+        err
+      );
     }
-  });
-}, [messages, currentUser]);
+  };
 
+  // =========================
+  // AUTO SEEN
+  // =========================
+  useEffect(() => {
+    if (!currentUser?.email) return;
+
+    messages.forEach((msg) => {
+      // skip my own message
+      if (
+        msg.senderEmail ===
+        currentUser.email
+      )
+        return;
+
+      // skip invalid ids
+      if (
+        !msg._id ||
+        msg._id.length !== 24
+      )
+        return;
+
+      // already seen
+      const alreadySeen =
+        msg.seenBy?.some(
+          (user) =>
+            user.email ===
+            currentUser.email
+        );
+
+      if (!alreadySeen) {
+        markAsSeen(msg._id);
+      }
+    });
+  }, [messages, currentUser]);
 
   // =========================
   // SEND MESSAGE
@@ -164,7 +228,10 @@ useEffect(() => {
     e.preventDefault();
 
     if (!currentUser) {
-      alert("Please login first");
+      alert(
+        "Please login first"
+      );
+
       return;
     }
 
@@ -177,53 +244,68 @@ useEffect(() => {
 
     try {
       const messageData = {
-  text,
+        text,
 
-  senderName:
-    currentUser.displayName ||
-    currentUser.email.split("@")[0],
+        senderName:
+          currentUser.displayName ||
+          currentUser.email.split(
+            "@"
+          )[0],
 
-  senderEmail: currentUser.email,
+        senderEmail:
+          currentUser.email,
 
-  createdAt: new Date(),
+        createdAt: new Date(),
 
-  seenBy: [
-    {
-      email: currentUser.email,
+        seenBy: [
+          {
+            email:
+              currentUser.email,
 
-      name:
-        currentUser.displayName ||
-        currentUser.email.split("@")[0],
-    },
-  ],
-};
+            name:
+              currentUser.displayName ||
+              currentUser.email.split(
+                "@"
+              )[0],
+          },
+        ],
+      };
 
       const res = await fetch(
         "https://team-collaboration-tool-server.vercel.app/messages",
         {
           method: "POST",
+
           headers: {
             "Content-Type":
               "application/json",
           },
+
           body: JSON.stringify(
             messageData
           ),
         }
       );
 
-      const data = await res.json();
+      const data =
+        await res.json();
 
       if (data.success) {
         e.target.reset();
 
-        setMessages((prev) => [
-          ...prev,
-          {
-            ...messageData,
-            _id: data.insertedId,
-          },
-        ]);
+        setMessages((prev) => {
+          const updated = [
+            ...prev,
+            {
+              ...messageData,
+              _id:
+                data.insertedId,
+            },
+          ];
+
+          // keep only last 10
+          return updated.slice(-10);
+        });
       }
     } catch (err) {
       console.log(err);
@@ -249,7 +331,7 @@ useEffect(() => {
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
 
         {messages.map((msg) => {
           const isMe =
@@ -274,7 +356,7 @@ useEffect(() => {
                 </div>
               )}
 
-              {/* MESSAGE AREA */}
+              {/* MESSAGE */}
               <div className="max-w-xs md:max-w-md">
 
                 {/* NAME */}
@@ -290,7 +372,7 @@ useEffect(() => {
                     : msg.senderName}
                 </p>
 
-                {/* MESSAGE BOX */}
+                {/* BOX */}
                 <div
                   className={`px-4 py-3 rounded-2xl shadow-md break-words ${
                     isMe
@@ -298,7 +380,7 @@ useEffect(() => {
                       : "bg-white text-black rounded-bl-sm"
                   }`}
                 >
-                  {/* MESSAGE */}
+                  {/* TEXT */}
                   <p>{msg.text}</p>
 
                   {/* TIME */}
@@ -315,7 +397,9 @@ useEffect(() => {
                         ).toLocaleTimeString(
                           [],
                           {
-                            hour: "2-digit",
+                            hour:
+                              "2-digit",
+
                             minute:
                               "2-digit",
                           }
@@ -323,40 +407,65 @@ useEffect(() => {
                       : ""}
                   </p>
 
-                  
-{/* SEEN STATUS */}
-{isMe && (
-  <div className="mt-1 text-right">
-    {msg.seenBy?.filter(
-      (user) =>
-        user.email !== currentUser?.email
-    ).length > 0 ? (
-      <div className="flex flex-wrap justify-end gap-1">
-        {msg.seenBy
-  ?.filter(user => user.email !== currentUser?.email)
-  .map((user, index) => (
-    <span
-      key={index}
-      className="text-[10px] bg-blue-400 px-2 py-[2px] rounded-full text-white"
-    >
-      {user.name} •{" "}
-      {user.seenAt
-        ? new Date(user.seenAt).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "Seen"}
-    </span>
-  ))}
-      </div>
-    ) : (
-      <p className="text-[10px] text-blue-100">
-        Sent
-      </p>
-    )}
-  </div>
-)}
+                  {/* SEEN STATUS */}
+                  {isMe && (
+                    <div className="mt-1 text-right">
+                      {msg.seenBy?.filter(
+                        (user) =>
+                          user.email !==
+                          currentUser?.email
+                      ).length >
+                      0 ? (
+                        <div className="flex flex-wrap justify-end gap-1">
 
+                          {msg.seenBy
+                            ?.filter(
+                              (
+                                user
+                              ) =>
+                                user.email !==
+                                currentUser?.email
+                            )
+                            .map(
+                              (
+                                user,
+                                index
+                              ) => (
+                                <span
+                                  key={
+                                    index
+                                  }
+                                  className="text-[10px] bg-blue-400 px-2 py-[2px] rounded-full text-white"
+                                >
+                                  {
+                                    user.name
+                                  }{" "}
+                                  •{" "}
+                                  {user.seenAt
+                                    ? new Date(
+                                        user.seenAt
+                                      ).toLocaleTimeString(
+                                        [],
+                                        {
+                                          hour:
+                                            "2-digit",
+
+                                          minute:
+                                            "2-digit",
+                                        }
+                                      )
+                                    : "Seen"}
+                                </span>
+                              )
+                            )}
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-blue-100">
+                          Sent
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -378,7 +487,7 @@ useEffect(() => {
         <div ref={bottomRef}></div>
       </div>
 
-      {/* INPUT AREA */}
+      {/* INPUT */}
       <form
         onSubmit={handleSend}
         className="p-3 bg-white border-t flex gap-2"
