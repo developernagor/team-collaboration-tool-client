@@ -28,6 +28,10 @@ function Navbar() {
       <Link to="/">Home</Link>
       
       <Link to="/message">Message</Link>
+
+      {/* <Link to="/dashboard">Dashboard</Link> */}
+
+      {/* <Link to="/profile">Profile</Link> */}
       
       
     </>

@@ -7,6 +7,8 @@ import Users from "./pages/Users/Users";
 import Register from "./pages/Register/Register";
 import Login from "./pages/Login/Login";
 import PrivateRoute from "./components/PrivateRoute";
+import Dashboard from "./components/Dashboard";
+import Profile from "./components/Profile";
 
 
 function App() {
@@ -52,6 +54,25 @@ function App() {
             }
           />
 
+          {/* PRIVATE ROUTE */}
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+
+{/* PRIVATE ROUTE */}
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
           {/* PUBLIC ROUTES */}
           <Route
             path="/register"
