@@ -73,7 +73,7 @@ function Message() {
     async () => {
       try {
         const res = await fetch(
-          "https://team-collaboration-tool-server.vercel.app/messagess"
+          "https://team-collaboration-tool-server.vercel.app/messages"
         );
 
         const data = await res.json();

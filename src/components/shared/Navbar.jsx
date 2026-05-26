@@ -1,16 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../../firebase/firebase.config";
+import {
+  onAuthStateChanged,
+  signOut,
+} from "firebase/auth";
 
+import { auth } from "../../firebase/firebase.config";
 
 function Navbar() {
   const [user, setUser] = useState(null);
 
+  // ✅ database user
+  const [dbUser, setDbUser] = useState(null);
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (currentUser) => {
+        setUser(currentUser);
+
+        // ✅ Fetch role from database
+        if (currentUser?.email) {
+          try {
+            const res = await fetch(
+              `https://team-collaboration-tool-server.vercel.app/users/${currentUser.email}`
+            );
+
+            const data = await res.json();
+
+            setDbUser(data);
+
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+    );
 
     return () => unsubscribe();
   }, []);
@@ -23,48 +48,71 @@ function Navbar() {
     }
   };
 
-  const navMenu = (
-    <>
-      <Link to="/">Home</Link>
-      
-      <Link to="/message">Message</Link>
+ const navMenu = (
+  <>
+    <Link to="/">Home</Link>
 
-      {/* <Link to="/dashboard">Dashboard</Link> */}
-
-      {/* <Link to="/profile">Profile</Link> */}
-      
-      
-    </>
-  );
+    {/* ✅ bondhu can see Message */}
+    {dbUser?.role === "bondhu" ? (
+      <Link to="/message">
+        Message
+      </Link>
+    ) : (
+      <p className="text-pink-500 font-bold">
+        🕵️ Spy:{" "}
+        {dbUser?.name ||
+          user?.displayName ||
+          user?.email?.split("@")[0]}
+      </p>
+    )}
+  </>
+);
 
   return (
     <div className="navbar bg-base-100 shadow-sm">
+
+      {/* LEFT */}
       <div className="navbar-start">
+
         <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+          <div
+            tabIndex={0}
+            role="button"
+            className="btn btn-ghost lg:hidden"
+          >
             ☰
           </div>
-          <ul className="menu menu-sm dropdown-content bg-base-100 p-2 shadow">
+
+          <ul className="menu menu-sm dropdown-content bg-base-100 p-2 shadow z-[1] rounded-box mt-3 w-52">
             {navMenu}
           </ul>
         </div>
 
-       <Link to="/" className="btn btn-ghost text-2xl font-bold">
-  <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text tracking-widest">
-    ARU
-  </span>
-</Link>
+        {/* LOGO */}
+        <Link
+          to="/"
+          className="btn btn-ghost text-2xl font-bold"
+        >
+          <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text tracking-widest">
+            ARU
+          </span>
+        </Link>
       </div>
 
+      {/* CENTER */}
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal gap-6 font-bold">
           {navMenu}
         </ul>
       </div>
 
+      {/* RIGHT */}
       <div className="navbar-end">
         {user?.email ? (
-          <button onClick={handleLogout} className="btn btn-error">
+          <button
+            onClick={handleLogout}
+            className="btn btn-error"
+          >
             Logout
           </button>
         ) : (
