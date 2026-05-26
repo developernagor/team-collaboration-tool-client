@@ -1,4 +1,4 @@
-a import {
+import {
   useCallback,
   useEffect,
   useRef,
@@ -73,7 +73,7 @@ function Message() {
     async () => {
       try {
         const res = await fetch(
-          "https://team-collaboration-tool-server.vercel.app/messages"
+          "https://team-collaboration-tool-server.vercel.app/messagess"
         );
 
         const data = await res.json();

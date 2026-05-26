@@ -1,4 +1,4 @@
-a import React from "react";
+import React from "react";
 import { Link } from "react-router";
 import Lottie from "lottie-react";
 import heroAnimation from "../../assets/hero.json";
