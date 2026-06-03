@@ -94,7 +94,7 @@ function Navbar() {
           className="btn btn-ghost text-2xl font-bold"
         >
           <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text tracking-widest">
-            ARU
+            Mehedi Educare
           </span>
         </Link>
       </div>

@@ -21,7 +21,7 @@ function Home() {
             <h1 className="text-5xl font-extrabold leading-tight">
               Welcome to{" "}
               <span className="bg-gradient-to-r from-pink-400 to-yellow-300 text-transparent bg-clip-text">
-                ARU
+                Mehedi Educare
               </span>
             </h1>
 
