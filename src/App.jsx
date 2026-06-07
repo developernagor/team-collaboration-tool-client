@@ -9,6 +9,7 @@ import Login from "./pages/Login/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./components/Dashboard";
 import Profile from "./components/Profile";
+import PhotoSend from "./components/shared/PhotoSend";
 
 
 function App() {
@@ -73,6 +74,16 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          <Route
+            path="/photosend"
+            element={
+              <PrivateRoute>
+                <PhotoSend />
+              </PrivateRoute>
+            }
+          />
+
           {/* PUBLIC ROUTES */}
           <Route
             path="/register"

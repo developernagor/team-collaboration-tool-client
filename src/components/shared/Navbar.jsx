@@ -48,15 +48,23 @@ function Navbar() {
     }
   };
 
- const navMenu = (
+const navMenu = (
   <>
     <Link to="/">Home</Link>
 
-    {/* ✅ bondhu can see Message */}
     {dbUser?.role === "bondhu" ? (
-      <Link to="/message">
-        Message
-      </Link>
+      <>
+        <Link to="/message">
+          Message
+        </Link>
+
+        <Link
+          to="/photosend"
+          className="px-4 py-2 rounded-lg hover:bg-blue-100"
+        >
+          📷 PhotoSend
+        </Link>
+      </>
     ) : (
       <p className="text-pink-500 font-bold">
         🕵️ Spy:{" "}
