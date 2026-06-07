@@ -11,10 +11,12 @@ function PhotoSend() {
   const [caption, setCaption] = useState("");
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // Replace with your ImgBB API key
 const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
-
+// console.log("IMG KEY =", imgbbKey);
+// console.log("ENV =", import.meta.env);
   // =========================
   // CURRENT USER
   // =========================
@@ -46,7 +48,7 @@ const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
           : []
       );
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 
@@ -75,6 +77,11 @@ const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
         "image",
         image
       );
+
+      console.log("Using Key:", imgbbKey);
+console.log(
+  `https://api.imgbb.com/1/upload?key=${imgbbKey}`
+);
 
       const uploadRes = await axios.post(
   `https://api.imgbb.com/1/upload?key=${imgbbKey}`,
@@ -121,9 +128,9 @@ const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
         fetchPhotos();
       }
     } catch (error) {
-  console.log(error.response?.data);
-  console.log(error.response?.status);
-  console.error("Upload Error:", error);
+  // console.log(error.response?.data);
+  // console.log(error.response?.status);
+  // console.error("Upload Error:", error);
 } finally {
       setLoading(false);
     }
@@ -212,10 +219,11 @@ const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
               >
                 <div className="overflow-hidden">
                   <img
-                    src={photo.image}
-                    alt="uploaded"
-                    className="w-full h-72 object-cover group-hover:scale-110 transition duration-500"
-                  />
+  src={photo.image}
+  alt="uploaded"
+  onClick={() => setSelectedImage(photo.image)}
+  className="w-full h-72 object-cover group-hover:scale-110 transition duration-500 cursor-pointer"
+/>
                 </div>
 
                 <div className="p-5">
@@ -236,6 +244,19 @@ const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
                       </p>
                     </div>
                   </div>
+
+                  {selectedImage && (
+  <div
+    onClick={() => setSelectedImage(null)}
+    className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
+  >
+    <img
+      src={selectedImage}
+      alt="preview"
+      className="max-w-full max-h-full rounded-lg shadow-lg"
+    />
+  </div>
+)}
 
                   {photo.caption && (
                     <p className="text-gray-700 leading-relaxed">

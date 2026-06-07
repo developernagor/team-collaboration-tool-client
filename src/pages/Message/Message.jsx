@@ -19,7 +19,7 @@ function Message() {
   const [currentUser, setCurrentUser] =
     useState(null);
 
-  const bottomRef = useRef(null);
+  const containerRef = useRef(null);
 
   // =========================
   // GET CURRENT USER
@@ -103,12 +103,12 @@ function Message() {
               )
           );
 
-        // ✅ Take last 10
-        const last10Messages =
-          sortedMessages.slice(-10);
+        // ✅ Take last 15
+        const last15Messages =
+          sortedMessages.slice(-15);
 
         setMessages(
-          last10Messages
+          last15Messages
         );
       } catch (err) {
         console.log(err);
@@ -130,16 +130,7 @@ function Message() {
       clearInterval(interval);
   }, [fetchMessages]);
 
-  // =========================
-  // AUTO SCROLL
-  // =========================
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView(
-      {
-        behavior: "smooth",
-      }
-    );
-  }, [messages]);
+
 
   // =========================
   // MARK AS SEEN
@@ -308,7 +299,7 @@ function Message() {
         });
       }
     } catch (err) {
-      console.log(err);
+      // console.log(err);
     } finally {
       setLoading(false);
     }
@@ -331,7 +322,7 @@ function Message() {
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
 
         {messages.map((msg) => {
           const isMe =
@@ -484,7 +475,6 @@ function Message() {
           );
         })}
 
-        <div ref={bottomRef}></div>
       </div>
 
       {/* INPUT */}
