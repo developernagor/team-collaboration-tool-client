@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -20,6 +21,7 @@ function Message() {
     useState(null);
 
   const containerRef = useRef(null);
+  const bottomRef = useRef(null);
 
   // =========================
   // GET CURRENT USER
@@ -34,6 +36,12 @@ function Message() {
 
     return () => unsub();
   }, []);
+
+useLayoutEffect(() => {
+  bottomRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages]);
 
   // =========================
   // UPDATE LAST SEEN
@@ -474,6 +482,8 @@ function Message() {
             </div>
           );
         })}
+
+        <div ref={bottomRef} />
 
       </div>
 
