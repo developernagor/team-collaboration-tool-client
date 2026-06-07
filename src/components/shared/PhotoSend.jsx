@@ -121,11 +121,10 @@ const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
         fetchPhotos();
       }
     } catch (error) {
-      console.error(
-        "Upload Error:",
-        error
-      );
-    } finally {
+  console.log(error.response?.data);
+  console.log(error.response?.status);
+  console.error("Upload Error:", error);
+} finally {
       setLoading(false);
     }
   };
