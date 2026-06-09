@@ -9,6 +9,7 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 
 import { auth } from "../../firebase/firebase.config";
+import PasswordGate from "../../components/PasswordGate";
 
 function Message() {
   const [messages, setMessages] =
@@ -22,6 +23,10 @@ function Message() {
 
   const containerRef = useRef(null);
   const bottomRef = useRef(null);
+
+
+
+
 
   // =========================
   // GET CURRENT USER
@@ -128,10 +133,12 @@ useLayoutEffect(() => {
   useEffect(() => {
     fetchMessages();
 
+
+
     // optional auto refresh
     const interval = setInterval(
       fetchMessages,
-      3000
+      10000
     );
 
     return () =>
@@ -139,6 +146,31 @@ useLayoutEffect(() => {
   }, [fetchMessages]);
 
 
+   const handleReaction = async (
+  messageId,
+  emoji
+) => {
+  try {
+    await fetch(
+      `https://team-collaboration-tool-server.vercel.app/messages/${messageId}/reaction`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          emoji,
+          email: currentUser.email,
+        }),
+      }
+    );
+
+    fetchMessages();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   // =========================
   // MARK AS SEEN
@@ -314,6 +346,7 @@ useLayoutEffect(() => {
   };
 
   return (
+    <PasswordGate>
     <div className="h-screen flex flex-col bg-gray-100">
 
       {/* HEADER */}
@@ -380,7 +413,48 @@ useLayoutEffect(() => {
                   }`}
                 >
                   {/* TEXT */}
-                  <p>{msg.text}</p>
+                  <>
+  <p>{msg.text}</p>
+
+ <div className="flex gap-2 mt-2">
+  {["👍", "❤️", "😂"].map(
+    (emoji) => (
+      <button
+  key={emoji}
+  onClick={() => {
+    console.log("Clicked:", emoji, msg._id);
+    handleReaction(msg._id, emoji);
+  }}
+  className={`text-xl transition-all ${
+  msg.reactions?.[emoji]?.includes(
+    currentUser?.email
+  )
+    ? "opacity-100 scale-110"
+    : "opacity-40"
+}`}
+>
+  {emoji}
+</button>
+    )
+  )}
+</div>
+
+  <div className="flex flex-wrap gap-2 mt-2">
+    {msg.reactions &&
+      Object.entries(
+        msg.reactions
+      ).map(
+        ([emoji, users]) => (
+          <span
+            key={emoji}
+            className="bg-gray-200 text-black px-2 py-1 rounded-full text-xs"
+          >
+            {emoji} {users.length}
+          </span>
+        )
+      )}
+  </div>
+</>
 
                   {/* TIME */}
                   <p
@@ -510,6 +584,7 @@ useLayoutEffect(() => {
         </button>
       </form>
     </div>
+    </PasswordGate>
   );
 }
 

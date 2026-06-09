@@ -4,6 +4,7 @@ import axios from "axios";
 
 import { auth } from "../../firebase/firebase.config";
 import { onAuthStateChanged } from "firebase/auth";
+import PasswordGate from "../PasswordGate";
 
 function PhotoSend() {
   const [user, setUser] = useState(null);
@@ -137,6 +138,7 @@ console.log(
   };
 
   return (
+    <PasswordGate>
     <div className="min-h-screen bg-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
 
@@ -271,6 +273,7 @@ console.log(
 
       </div>
     </div>
+    </PasswordGate>
   );
 }
 

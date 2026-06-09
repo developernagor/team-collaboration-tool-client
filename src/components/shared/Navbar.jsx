@@ -64,6 +64,9 @@ const navMenu = (
         >
           📷 PhotoSend
         </Link>
+        <Link to="/users">
+          Active Status
+        </Link>
       </>
     ) : (
       <p className="text-pink-500 font-bold">

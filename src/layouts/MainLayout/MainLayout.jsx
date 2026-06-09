@@ -5,7 +5,7 @@ import Footer from '../../components/shared/Footer'
 
 function MainLayout() {
   return (
-    <div>
+    <div lassName="pt-16">
       <Navbar></Navbar>
       <div className="min-h-[calc(100vh-116px)]">
       <Outlet></Outlet>
