@@ -27,6 +27,48 @@ function Message() {
   const [replyingTo, setReplyingTo] = useState(null);
 
 
+const typingTimeoutRef = useRef(null);
+
+const [typingUsers, setTypingUsers] =
+  useState([]);
+
+
+
+const fetchTypingUsers =
+  async () => {
+    try {
+      const res = await fetch(
+        "https://team-collaboration-tool-server.vercel.app/users"
+      );
+
+      const users =
+        await res.json();
+
+      const typing =
+        users.filter(
+          (user) =>
+            user.typing &&
+            user.email !==
+              currentUser?.email
+        );
+
+      setTypingUsers(typing);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+  fetchTypingUsers();
+
+  const interval = setInterval(
+    fetchTypingUsers,
+    1000
+  );
+
+  return () =>
+    clearInterval(interval);
+}, [currentUser]);
 
 
   // =========================
@@ -118,11 +160,11 @@ useLayoutEffect(() => {
           );
 
         // ✅ Take last 15
-        const last15Messages =
-          sortedMessages.slice(-15);
+        const last30Messages =
+          sortedMessages.slice(-30);
 
         setMessages(
-          last15Messages
+          last30Messages
         );
       } catch (err) {
         console.log(err);
@@ -311,7 +353,7 @@ useLayoutEffect(() => {
           },
         ],
       };
-console.log("Sending:", messageData);
+// console.log("Sending:", messageData);
       const res = await fetch(
         "https://team-collaboration-tool-server.vercel.app/messages",
         {
@@ -331,30 +373,68 @@ console.log("Sending:", messageData);
       const data =
         await res.json();
 
+        
+
       if (data.success) {
-        e.target.reset();
-setReplyingTo(null);
+  await fetch(
+    "https://team-collaboration-tool-server.vercel.app/users/typing",
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: currentUser.email,
+        typing: false,
+      }),
+    }
+  );
 
-        setMessages((prev) => {
-          const updated = [
-            ...prev,
-            {
-              ...messageData,
-              _id:
-                data.insertedId,
-            },
-          ];
+  e.target.reset();
+  setReplyingTo(null);
+setMessages((prev) => {
+    const updated = [
+      ...prev,
+      {
+        ...messageData,
+        _id: data.insertedId,
+      },
+    ];
 
-          // keep only last 10
-          return updated.slice(-15);
-        });
-      }
+    return updated.slice(-15);
+  });
+}
     } catch (err) {
       // console.log(err);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleTyping = async () => {
+  if (!currentUser?.email) return;
+
+  try {
+    await fetch(
+      "https://team-collaboration-tool-server.vercel.app/users/typing",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: currentUser.email,
+          name:
+            currentUser.displayName ||
+            currentUser.email.split("@")[0],
+          typing: true,
+        }),
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   return (
     <PasswordGate>
@@ -629,17 +709,54 @@ setReplyingTo(null);
   </div>
 )}
 
+{typingUsers.length > 0 && (
+  <div className="px-4 py-2 text-sm text-gray-500 italic">
+    {typingUsers
+      .map((u) => u.typingName)
+      .join(", ")}
+     {typingUsers.length > 1
+      ? " are typing..."
+      : " is typing..."}
+    is typing...
+  </div>
+)}
       {/* INPUT */}
       <form
         onSubmit={handleSend}
         className="p-3 bg-white border-t flex gap-2"
       >
-        <input
-          type="text"
-          name="message"
-          placeholder="Type message..."
-          className="flex-1 border rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400"
-        />
+        
+       <input
+  type="text"
+  name="message"
+  placeholder="Type message..."
+  className="flex-1 border rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400"
+  onChange={() => {
+    handleTyping();
+
+    clearTimeout(typingTimeoutRef.current);
+
+    typingTimeoutRef.current = setTimeout(
+      async () => {
+        await fetch(
+          "https://team-collaboration-tool-server.vercel.app/users/typing",
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              email: currentUser.email,
+              typing: false,
+            }),
+          }
+        );
+      },
+      2000
+    );
+  }}
+/>
 
         <button
           type="submit"
