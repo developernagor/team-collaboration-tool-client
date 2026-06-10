@@ -24,6 +24,7 @@ function Message() {
   const containerRef = useRef(null);
   const bottomRef = useRef(null);
 
+  const [replyingTo, setReplyingTo] = useState(null);
 
 
 
@@ -288,6 +289,15 @@ useLayoutEffect(() => {
 
         createdAt: new Date(),
 
+        replyTo: replyingTo
+    ? {
+        id: replyingTo._id,
+        text: replyingTo.text,
+        senderName:
+          replyingTo.senderName,
+      }
+    : null,
+
         seenBy: [
           {
             email:
@@ -301,7 +311,7 @@ useLayoutEffect(() => {
           },
         ],
       };
-
+console.log("Sending:", messageData);
       const res = await fetch(
         "https://team-collaboration-tool-server.vercel.app/messages",
         {
@@ -323,6 +333,7 @@ useLayoutEffect(() => {
 
       if (data.success) {
         e.target.reset();
+setReplyingTo(null);
 
         setMessages((prev) => {
           const updated = [
@@ -335,7 +346,7 @@ useLayoutEffect(() => {
           ];
 
           // keep only last 10
-          return updated.slice(-10);
+          return updated.slice(-15);
         });
       }
     } catch (err) {
@@ -381,10 +392,21 @@ useLayoutEffect(() => {
             >
               {/* LEFT AVATAR */}
               {!isMe && (
-                <div className="w-10 h-10 rounded-full bg-gray-400 text-white flex items-center justify-center mr-2 font-bold shrink-0">
+                <div>
+                  
+                  <div className="w-10 h-10 rounded-full bg-gray-400 text-white flex items-center justify-center mr-2 font-bold shrink-0">
                   {msg.senderName
                     ?.charAt(0)
                     .toUpperCase()}
+                </div>
+                <div>
+                    <button
+  onClick={() => setReplyingTo(msg)}
+  className="text-xs text-blue-500 hover:underline mt-1"
+>
+  Reply
+</button>
+</div>
                 </div>
               )}
 
@@ -403,6 +425,7 @@ useLayoutEffect(() => {
                     ? "You"
                     : msg.senderName}
                 </p>
+  
 
                 {/* BOX */}
                 <div
@@ -414,7 +437,28 @@ useLayoutEffect(() => {
                 >
                   {/* TEXT */}
                   <>
-  <p>{msg.text}</p>
+  
+  {msg.replyTo && (
+  <div
+    className={`mb-2 p-2 rounded border-l-4 ${
+      isMe
+        ? "bg-blue-400 border-blue-200"
+        : "bg-gray-100 border-blue-500"
+    }`}
+  >
+    <p className="text-xs font-bold">
+      {msg.replyTo.senderName}
+    </p>
+
+    <p className="text-xs truncate">
+      {msg.replyTo.text}
+    </p>
+  </div>
+)}
+
+<p>{msg.text}</p>
+
+
 
  <div className="flex gap-2 mt-2">
   {["👍", "❤️", "😂"].map(
@@ -560,6 +604,30 @@ useLayoutEffect(() => {
         <div ref={bottomRef} />
 
       </div>
+
+   {replyingTo && (
+  <div className="bg-white border-t px-4 py-2">
+    <div className="bg-gray-100 p-2 rounded flex justify-between items-start">
+      <div>
+        <p className="text-xs font-bold text-blue-600">
+          Replying to {replyingTo.senderName}
+        </p>
+
+        <p className="text-sm truncate">
+          {replyingTo.text}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setReplyingTo(null)}
+        className="text-red-500"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+)}
 
       {/* INPUT */}
       <form
