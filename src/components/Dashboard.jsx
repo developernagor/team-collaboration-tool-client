@@ -15,6 +15,33 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const [dashboardUser, setDashboardUser] =
   useState(null);
+
+  const [favoriteMessages, setFavoriteMessages] =
+  useState([]);
+
+const [page, setPage] =
+  useState(1);
+
+const [totalPages, setTotalPages] =
+  useState(1);
+
+  useEffect(() => {
+  if (!user?.email) return;
+
+  fetch(
+    `https://team-collaboration-tool-server.vercel.app/favorite-messages/${user.email}?page=${page}&limit=5`
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      setFavoriteMessages(
+        data.messages
+      );
+
+      setTotalPages(
+        data.totalPages
+      );
+    });
+}, [user, page]);
   
   const [stats, setStats] = useState({
   totalMessages: 0,
@@ -313,6 +340,91 @@ const formatTime = (seconds) => {
       )
     )}
   </div>
+</div>
+
+{/* Recent Messages */}
+<div className="bg-white rounded-2xl shadow p-6 mt-6">
+  <h2 className="text-xl font-bold mb-4">
+    💬 Recent Messages
+  </h2>
+
+  {stats.recentMessages?.map((msg) => (
+    <div
+      key={msg._id}
+      className="flex gap-3 mb-4"
+    >
+      <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
+        {msg.senderName?.charAt(0)}
+      </div>
+
+      <div className="flex-1">
+        <div className="flex justify-between">
+          <h4 className="font-semibold">
+            {msg.senderName}
+          </h4>
+
+          <span className="text-xs text-gray-400">
+            {new Date(
+              msg.createdAt
+            ).toLocaleDateString()}
+          </span>
+        </div>
+
+        <p className="text-gray-600">
+          {msg.text}
+        </p>
+      </div>
+    </div>
+  ))}
+</div>
+
+{/* Favourite Messages */}
+<div className="bg-white rounded-2xl shadow p-6 mt-6">
+  <h2 className="text-xl font-bold mb-4">
+    ❤️ Favorite Messages
+  </h2>
+
+  {favoriteMessages.map((msg) => (
+    <div
+      key={msg._id}
+      className="border rounded-xl p-4 mb-3"
+    >
+      <p>{msg.text}</p>
+
+      <div className="text-sm text-gray-500 mt-2">
+        {msg.senderName}
+      </div>
+    </div>
+  ))}
+</div>
+
+{/* Pagination button */}
+<div className="flex justify-center gap-2 mt-4">
+  <button
+    disabled={page === 1}
+    onClick={() =>
+      setPage(page - 1)
+    }
+    className="btn"
+  >
+    Previous
+  </button>
+
+  <span className="px-4 py-2">
+    {page} / {totalPages}
+  </span>
+
+  <button
+    disabled={
+      page === totalPages
+    }
+    onClick={() =>
+      setPage(page + 1)
+    }
+    className="btn"
+  >
+    Next
+  </button>
 </div>
 
     {/* QUICK ACTIONS */}
