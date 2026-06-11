@@ -42,6 +42,19 @@ function Navbar() {
 
   const handleLogout = async () => {
     try {
+      await fetch(
+    "https://team-collaboration-tool-server.vercel.app/users/session/end",
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        email: user.email,
+      }),
+    }
+  );
       await signOut(auth);
     } catch (error) {
       console.log(error.message);
@@ -67,6 +80,11 @@ const navMenu = (
         <Link to="/users">
           Active Status
         </Link>
+
+        <Link to="/dashboard">
+          Dashboard
+        </Link>
+
       </>
     ) : (
       <p className="text-pink-500 font-bold">

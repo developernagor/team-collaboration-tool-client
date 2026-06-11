@@ -717,7 +717,6 @@ setMessages((prev) => {
      {typingUsers.length > 1
       ? " are typing..."
       : " is typing..."}
-    is typing...
   </div>
 )}
       {/* INPUT */}
