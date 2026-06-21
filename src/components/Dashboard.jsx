@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import PasswordGate from "./PasswordGate";
 
 
 function Dashboard() {
@@ -221,6 +222,7 @@ const formatTime = (seconds) => {
 }
 
   return (
+    <PasswordGate>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
 
   <div className="max-w-6xl mx-auto">
@@ -533,6 +535,7 @@ const formatTime = (seconds) => {
 
   </div>
 </div>
+</PasswordGate>
   );
 }
 

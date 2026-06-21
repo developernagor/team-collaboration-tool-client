@@ -159,12 +159,12 @@ useLayoutEffect(() => {
               )
           );
 
-        // ✅ Take last 15
-        const last30Messages =
-          sortedMessages.slice(-30);
+        // ✅ Take last 30
+        const last40Messages =
+          sortedMessages.slice(-40);
 
         setMessages(
-          last30Messages
+          last40Messages
         );
       } catch (err) {
         console.log(err);
@@ -181,7 +181,7 @@ useLayoutEffect(() => {
     // optional auto refresh
     const interval = setInterval(
       fetchMessages,
-      10000
+      20000
     );
 
     return () =>
@@ -541,7 +541,7 @@ setMessages((prev) => {
 
 
  <div className="flex gap-2 mt-2">
-  {["👍", "❤️", "😂"].map(
+  {["👍", "❤️", "😂", "😡", "🥹"].map(
     (emoji) => (
       <button
   key={emoji}
