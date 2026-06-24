@@ -61,47 +61,37 @@ function Navbar() {
     }
   };
 
+  let roleMenu;
+
+if (dbUser?.role === "bondhu") {
+  roleMenu = (
+    <>
+      <Link to="/message">Message</Link>
+      <Link to="/photosend">📷 PhotoSend</Link>
+      <Link to="/users">Active Status</Link>
+      <Link to="/dashboard">Dashboard</Link>
+    </>
+  );
+} else if (dbUser?.role === "admin") {
+  roleMenu = (
+    <>
+      <Link to="/add-student">Add Student</Link>
+      <Link to="/all-students">All Students</Link>
+    </>
+  );
+} else {
+  roleMenu = (
+    <p className="text-pink-500 font-bold">
+      🕵️ Spy:{" "}
+      {dbUser?.name || user?.displayName || user?.email?.split("@")[0]}
+    </p>
+  );
+}
+
 const navMenu = (
   <>
     <Link to="/">Home</Link>
-
-    {dbUser?.role === "bondhu" ? (
-      <>
-        <Link to="/message">
-          Message
-        </Link>
-
-        <Link
-          to="/photosend"
-          className="px-4 py-2 rounded-lg hover:bg-blue-100"
-        >
-          📷 PhotoSend
-        </Link>
-        <Link to="/users">
-          Active Status
-        </Link>
-
-        <Link to="/dashboard">
-          Dashboard
-        </Link>
-
-        <Link to="/add-student">
-          Add Student
-        </Link>
-
-        <Link to="/all-students">
-          All Students
-        </Link>
-
-      </>
-    ) : (
-      <p className="text-pink-500 font-bold">
-        🕵️ Spy:{" "}
-        {dbUser?.name ||
-          user?.displayName ||
-          user?.email?.split("@")[0]}
-      </p>
-    )}
+    {roleMenu}
   </>
 );
 

@@ -1,93 +1,98 @@
+/*
+ FULL STUDENTDETAILS.JSX TEMPLATE
+ This is a complete scaffold that includes:
+ - Modern dashboard layout
+ - Student info cards
+ - Stats cards
+ - Add Payment form
+ - Payment history table
+ - Notes section
+ - Hooks for QR/jsPDF receipt generation
+
+ Paste your existing generateReceipt() implementation into the marked area.
+*/
+
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router";
 import axios from "axios";
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 
-function StudentDetails() {
+export default function StudentDetails() {
   const { id } = useParams();
 
   const [student, setStudent] = useState(null);
   const [payments, setPayments] = useState([]);
-  const [paymentData, setPaymentData] = useState({
-  amount: "",
-  startDate: "",
-  endDate: "",
-  paymentMethod: "Cash",
-  note: "",
-});
   const [loading, setLoading] = useState(true);
 
+  const [paymentData, setPaymentData] = useState({
+    amount: "",
+    month: "",
+    startDate: "",
+    endDate: "",
+    paymentDate: "",
+    paymentMethod: "Cash",
+    note: "",
+  });
 
-  const handlePayment = async (e) => {
-  e.preventDefault();
+  useEffect(() => {
+    fetchStudent();
+    fetchPayments();
+  }, [id]);
 
-  try {
-    const newPayment = {
-  studentId: id,
-  month: paymentData.month,
-  amount: paymentData.amount,
-  startDate: paymentData.startDate,
-  endDate: paymentData.endDate,
-  paymentMethod: paymentData.paymentMethod,
-  note: paymentData.note,
-  paidDate: new Date()
-    .toISOString()
-    .split("T")[0],
-};
+  const fetchStudent = async () => {
+    try {
+      const res = await axios.get(
+        `https://team-collaboration-tool-server.vercel.app/students/${id}`
+      );
+      setStudent(res.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPayments = async () => {
+    const res = await axios.get(
+      `https://team-collaboration-tool-server.vercel.app/payments/${id}`
+    );
+    setPayments(res.data);
+  };
+
+   const handlePayment = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      studentId: id,
+      ...paymentData,
+      paidDate: paymentData.paymentDate,
+    };
 
     const res = await axios.post(
       "https://team-collaboration-tool-server.vercel.app/payments",
-      newPayment
+      payload
     );
 
     if (res.data.insertedId) {
-      alert("Payment Added");
+      fetchPayments();
 
       setPaymentData({
         amount: "",
         month: "",
+        startDate: "",
+        endDate: "",
         paymentMethod: "Cash",
         note: "",
       });
-
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
-const fetchPayments = async () => {
-  try {
-    const res = await axios.get(
-      `https://team-collaboration-tool-server.vercel.app/payments/${id}`
-    );
+  };
 
-    setPayments(res.data);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-
-const latestPayment =
+  const latestPayment =
   payments.length > 0
     ? [...payments].sort(
         (a, b) =>
-          new Date(b.endDate) - new Date(a.endDate)
+          new Date(b.paidDate) - new Date(a.paidDate)
       )[0]
     : null;
-
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-let isDue = true;
-
-if (latestPayment?.endDate) {
-  const paymentEnd = new Date(latestPayment.endDate);
-  paymentEnd.setHours(0, 0, 0, 0);
-
-  isDue = paymentEnd < today;
-}
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "N/A";
@@ -252,367 +257,205 @@ doc.text("Mehedi Hassan", 140, 242);
   );
 };
 
-  useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const res = await axios.get(
-          `https://team-collaboration-tool-server.vercel.app/students/${id}`
-        );
-
-        setStudent(res.data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStudent();
-  }, [id]);
-
-  useEffect(() => {
-  axios
-    .get(`https://team-collaboration-tool-server.vercel.app/payments/${id}`)
-    .then((res) => {
-      setPayments(res.data);
-    });
-}, [id]);
-
-
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
-
-  if (!student) {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-3xl font-bold text-red-500">
-          Student Not Found
-        </h2>
-
-        <Link
-          to="/students"
-          className="btn btn-primary mt-5"
-        >
-          Back
-        </Link>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
+  if (!student) return <div>Student not found</div>;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
-      <div className="card bg-base-100 shadow-xl">
+    <div className="max-w-7xl mx-auto p-6">
+
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 rounded-3xl p-8 text-white shadow-2xl mb-8">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-24 rounded-full bg-white text-indigo-600 flex items-center justify-center text-4xl font-bold">
+              {student.studentName?.charAt(0)}
+            </div>
+
+            <div>
+              <h1 className="text-4xl font-bold">{student.studentName}</h1>
+              <p>{student.className}</p>
+              <p>{student.schoolName}</p>
+            </div>
+          </div>
+
+          <Link to="/all-students" className="btn">
+            Back
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title">Personal Information</h2>
+            <p>Father: {student.fatherName}</p>
+            <p>Mother: {student.motherName}</p>
+            <p>Phone: {student.phone}</p>
+            <p>Guardian: {student.guardianPhone}</p>
+            <p>Address: {student.address}</p>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title">Academic Information</h2>
+            <p>School: {student.schoolName}</p>
+            <p>Class: {student.className}</p>
+            <p>Admission: {student.admissionDate}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-4 gap-5 mb-8">
+        <div className="card bg-base-100 shadow-xl"><div className="card-body"><p>Monthly Salary</p><h2 className="text-3xl font-bold">৳{student.monthlySalary}</h2></div></div>
+        <div className="card bg-base-100 shadow-xl"><div className="card-body"><p>Total Payments</p><h2 className="text-3xl font-bold">{payments.length}</h2></div></div>
+        <div className="card bg-base-100 shadow-xl"><div className="card-body"><p>Salary Date</p><h2 className="text-3xl font-bold">{student.salaryDate}</h2></div></div>
+          {/* Last Payment */}
+  <div className="card bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl">
+    <div className="card-body">
+      <p>Last Payment</p>
+
+      {latestPayment ? (
+        <>
+          <h2 className="text-3xl font-bold">
+            ৳{latestPayment.amount}
+          </h2>
+
+          <p>{latestPayment.month}</p>
+
+          <p className="text-xs">
+            {latestPayment.paidDate}
+          </p>
+        </>
+      ) : (
+        <p>No Payment</p>
+      )}
+    </div>
+  </div>
+        
+      </div>
+
+      
+
+      <div className="card bg-base-100 shadow-xl mb-8">
         <div className="card-body">
+          <h2 className="card-title text-success">Add Payment</h2>
 
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-4xl font-bold">
-              Student Details
-            </h2>
+          <form onSubmit={handlePayment} className="grid md:grid-cols-2 gap-4">
+            <input className="input input-bordered" placeholder="Amount"
+              value={paymentData.amount}
+              onChange={(e)=>setPaymentData({...paymentData,amount:e.target.value})}
+            />
 
-            <Link
-              to="/all-students"
-              className="btn btn-outline"
-            >
-              Back
-            </Link>
-          </div>
+            <input className="input input-bordered" placeholder="Month"
+              value={paymentData.month}
+              onChange={(e)=>setPaymentData({...paymentData,month:e.target.value})}
+            />
+<label className="font-semibold">
+  Month Start Date
+</label>
+            <input type="date" className="input input-bordered"
+              value={paymentData.startDate}
+              onChange={(e)=>setPaymentData({...paymentData,startDate:e.target.value})}
+            />
+<label className="font-semibold">
+  Month End Date
+</label>
+            <input type="date" className="input input-bordered"
+              value={paymentData.endDate}
+              onChange={(e)=>setPaymentData({...paymentData,endDate:e.target.value})}
+            />
+            <label className="font-semibold">
+  Payment Date
+</label>
 
-          <div className="grid md:grid-cols-2 gap-6">
-
-            <div className="space-y-3">
-              <h3 className="text-xl font-bold border-b pb-2">
-                Personal Information
-              </h3>
-
-              <p>
-                <strong>Name:</strong>{" "}
-                {student.studentName}
-              </p>
-
-              <p>
-                <strong>Father Name:</strong>{" "}
-                {student.fatherName || "N/A"}
-              </p>
-
-              <p>
-                <strong>Mother Name:</strong>{" "}
-                {student.motherName || "N/A"}
-              </p>
-
-              <p>
-                <strong>Phone:</strong>{" "}
-                {student.phone}
-              </p>
-
-              <p>
-                <strong>Guardian Phone:</strong>{" "}
-                {student.guardianPhone || "N/A"}
-              </p>
-
-              <p>
-                <strong>Address:</strong>{" "}
-                {student.address || "N/A"}
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-xl font-bold border-b pb-2">
-                Academic Information
-              </h3>
-
-              <p>
-                <strong>School:</strong>{" "}
-                {student.schoolName || "N/A"}
-              </p>
-
-              <p>
-                <strong>Class:</strong>{" "}
-                {student.className || "N/A"}
-              </p>
-
-              <p>
-                <strong>Admission Date:</strong>{" "}
-                {student.admissionDate || "N/A"}
-              </p>
-            </div>
-
-          </div>
-
-          <div className="divider"></div>
-
-          <div className="grid md:grid-cols-3 gap-5">
-
-            <div className="stat shadow rounded-xl">
-              <div className="stat-title">
-                Monthly Salary
-              </div>
-
-              <div className="stat-value text-primary">
-                ৳{student.monthlySalary || 0}
-              </div>
-            </div>
-
-            <div className="stat shadow rounded-xl">
-              <div className="stat-title">
-                Salary Date
-              </div>
-
-              <div className="stat-value text-secondary">
-                {student.salaryDate || "N/A"}
-              </div>
-            </div>
-
-            <div className="stat shadow rounded-xl">
-  <div className="stat-title">
-    Payment Status
-  </div>
-
-  <div className="stat-value text-lg">
-    <span
-      className={`badge badge-lg ${
-        isDue
-          ? "badge-error"
-          : "badge-success"
-      }`}
-    >
-      {isDue ? "Due" : "Paid"}
-    </span>
-  </div>
-</div>
-
-          </div>
-
-          <div className="mt-6 p-4 border rounded-lg bg-base-200">
-  <h3 className="font-bold text-lg mb-2">
-    Last Paid Period
-  </h3>
-
-  {latestPayment ? (
-    <p>
-      {latestPayment.startDate} → {latestPayment.endDate}
-    </p>
-  ) : (
-    <p>No payment history found</p>
-  )}
-</div>
-
-          <div className="divider"></div>
-
-<h2 className="text-2xl font-bold mb-4">
-  Add Payment
-</h2>
-
-<form
-  onSubmit={handlePayment}
-  className="grid md:grid-cols-2 gap-4"
->
-  <input
-    type="number"
-    placeholder="Amount"
-    className="input input-bordered"
-    value={paymentData.amount}
-    onChange={(e) =>
-      setPaymentData({
-        ...paymentData,
-        amount: e.target.value,
-      })
-    }
-    required
-  />
-
-  <input
-    type="text"
-    placeholder="Month (June 2026)"
-    className="input input-bordered"
-    value={paymentData.month}
-    onChange={(e) =>
-      setPaymentData({
-        ...paymentData,
-        month: e.target.value,
-      })
-    }
-    required
-  />
-  <input
-  type="date"
-  className="input input-bordered"
-  value={paymentData.startDate}
-  onChange={(e) =>
-    setPaymentData({
-      ...paymentData,
-      startDate: e.target.value,
-    })
-  }
-  required
-/>
 <input
   type="date"
-  className="input input-bordered"
-  value={paymentData.endDate}
+  className="input input-bordered w-full"
+  value={paymentData.paymentDate}
   onChange={(e) =>
     setPaymentData({
       ...paymentData,
-      endDate: e.target.value,
+      paymentDate: e.target.value,
     })
   }
   required
 />
+<label className="font-semibold">
+  Payment Method
+</label>
+            <select className="select select-bordered"
+              value={paymentData.paymentMethod}
+              onChange={(e)=>setPaymentData({...paymentData,paymentMethod:e.target.value})}>
+              <option>Cash</option>
+              <option>Bkash</option>
+              <option>Nagad</option>
+              <option>Bank</option>
+            </select>
 
-  <select
-    className="select select-bordered"
-    value={paymentData.paymentMethod}
-    onChange={(e) =>
-      setPaymentData({
-        ...paymentData,
-        paymentMethod: e.target.value,
-      })
-    }
-  >
-    <option>Cash</option>
-    <option>Bkash</option>
-    <option>Nagad</option>
-    <option>Bank</option>
-  </select>
+            <input className="input input-bordered" placeholder="Note"
+              value={paymentData.note}
+              onChange={(e)=>setPaymentData({...paymentData,note:e.target.value})}
+            />
 
-  <input
-    type="text"
-    placeholder="Note"
-    className="input input-bordered"
-    value={paymentData.note}
-    onChange={(e) =>
-      setPaymentData({
-        ...paymentData,
-        note: e.target.value,
-      })
-    }
-  />
+            <button className="btn btn-success md:col-span-2">
+              Add Payment
+            </button>
+          </form>
+        </div>
+      </div>
 
-  <button
-    type="submit"
-    className="btn btn-success md:col-span-2"
-  >
-    Add Payment
-  </button>
-</form>
+      <div className="card bg-base-100 shadow-xl mb-8">
+        <div className="card-body">
+          <h2 className="card-title">Notes</h2>
+          <p>{student.note || "No notes available"}</p>
+        </div>
+      </div>
 
-          <div className="divider"></div>
 
-          <div>
-            <h3 className="text-xl font-bold mb-3">
-              Notes
-            </h3>
 
-            <div className="border rounded-lg p-4 bg-base-200">
-              {student.note || "No notes available"}
-            </div>
+{/* Payment History */}
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h2 className="card-title">Payment History</h2>
+
+          <div className="overflow-x-auto">
+            <table className="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Period</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Payment Date</th>
+                  <th>Receipt</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {payments.map((payment) => (
+                  <tr key={payment._id}>
+                    <td>{payment.month}</td>
+                    <td>{payment.startDate} - {payment.endDate}</td>
+                    <td>{payment.amount}</td>
+                    <td>{payment.paymentMethod}</td>
+                    <td>{payment.paidDate}</td>
+                    <td>
+                      <button
+                        onClick={() => generateReceipt(payment)}
+                        className="btn btn-primary btn-sm"
+                      >
+                        Download
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-
-
-          <div className="divider"></div>
-
-<h2 className="text-2xl font-bold mb-4">
-  Payment History
-</h2>
-
-<div className="overflow-x-auto">
-  <table className="table">
-    <thead>
-  <tr>
-    <th>Month</th>
-    <th>Period</th>
-    <th>Amount</th>
-    <th>Paid Date</th>
-    <th>Method</th>
-    <th>Note</th>
-    <th>Receipt</th>
-  </tr>
-</thead>
-
-    <tbody>
-  {payments.map((payment) => (
-    <tr key={payment._id}>
-        <td>
-        {payment.month}
-      </td>
-
-        
-      <td>
-        {payment.startDate} <br />
-        to <br />
-        {payment.endDate}
-      </td>
-
-      <td>৳{payment.amount}</td>
-
-      <td>{payment.paidDate}</td>
-
-      <td>{payment.paymentMethod}</td>
-
-      <td>{payment.note}</td>
-      <td>
-  <button
-    onClick={() => generateReceipt(payment)}
-    className="btn btn-primary btn-xs"
-  >
-    PDF
-  </button>
-</td>
-    </tr>
-  ))}
-</tbody>
-  </table>
-</div>
 
         </div>
       </div>
+
     </div>
   );
 }
-
-export default StudentDetails;
