@@ -85,6 +85,14 @@ const navMenu = (
           Dashboard
         </Link>
 
+        <Link to="/add-student">
+          Add Student
+        </Link>
+
+        <Link to="/all-students">
+          All Students
+        </Link>
+
       </>
     ) : (
       <p className="text-pink-500 font-bold">

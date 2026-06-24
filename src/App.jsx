@@ -10,6 +10,9 @@ import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./components/Dashboard";
 import Profile from "./components/Profile";
 import PhotoSend from "./components/shared/PhotoSend";
+import AllStudents from "./pages/AllStudents";
+import AddStudent from "./pages/AddStudent";
+import StudentDetails from "./StudentDetails";
 
 
 function App() {
@@ -81,6 +84,25 @@ function App() {
               <PrivateRoute>
                 <PhotoSend />
               </PrivateRoute>
+            }
+          />
+
+<Route
+            path="/add-student"
+            element={
+              <AddStudent />
+            }
+          />
+          <Route
+            path="/all-students"
+            element={
+              <AllStudents />
+            }
+          />
+          <Route
+            path="/student/:id"
+            element={
+              <StudentDetails />
             }
           />
 
