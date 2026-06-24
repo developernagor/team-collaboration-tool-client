@@ -7,6 +7,7 @@ function AddStudent() {
     fatherName: "",
     motherName: "",
     phone: "",
+    whatsapp: "",
     guardianPhone: "",
     address: "",
     note: "",
@@ -241,6 +242,15 @@ function AddStudent() {
                 </h2>
 
                 <div className="grid md:grid-cols-2 gap-4">
+
+                  <input
+  type="text"
+  name="whatsapp"
+  placeholder="WhatsApp Number"
+  value={formData.whatsapp || ""}
+  onChange={handleChange}
+  className="input input-bordered"
+/>
 
                   <textarea
                     name="address"

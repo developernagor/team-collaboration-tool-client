@@ -1,17 +1,3 @@
-/*
- FULL STUDENTDETAILS.JSX TEMPLATE
- This is a complete scaffold that includes:
- - Modern dashboard layout
- - Student info cards
- - Stats cards
- - Add Payment form
- - Payment history table
- - Notes section
- - Hooks for QR/jsPDF receipt generation
-
- Paste your existing generateReceipt() implementation into the marked area.
-*/
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router";
 import axios from "axios";
@@ -272,8 +258,9 @@ doc.text("Mehedi Hassan", 140, 242);
 
             <div>
               <h1 className="text-4xl font-bold">{student.studentName}</h1>
-              <p>{student.className}</p>
               <p>{student.schoolName}</p>
+              <p>Class: {student.className}</p>
+              
             </div>
           </div>
 
@@ -285,15 +272,41 @@ doc.text("Mehedi Hassan", 140, 242);
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Personal Information</h2>
-            <p>Father: {student.fatherName}</p>
-            <p>Mother: {student.motherName}</p>
-            <p>Phone: {student.phone}</p>
-            <p>Guardian: {student.guardianPhone}</p>
-            <p>Address: {student.address}</p>
-          </div>
-        </div>
+  <div className="card-body">
+    <h2 className="card-title">
+      Personal Information
+    </h2>
+
+    <p>Father: {student.fatherName}</p>
+    <p>Mother: {student.motherName}</p>
+    <p>Phone: {student.phone}</p>
+    <p>Guardian: {student.guardianPhone}</p>
+    <p>Address: {student.address}</p>
+
+    <div className="mt-4 flex gap-2">
+      <a
+        href={`tel:${student.guardianPhone}`}
+        className="btn btn-primary btn-sm"
+      >
+        📞 Call
+      </a>
+
+      <a
+        href={`https://wa.me/${
+          student.whatsapp || student.guardianPhone
+        }?text=${encodeURIComponent(
+          `Assalamu Alaikum, regarding ${student.studentName}'s tuition payment.`
+        )}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn btn-success btn-sm"
+      >
+        💬 WhatsApp
+      </a>
+    </div>
+
+  </div>
+</div>
 
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
