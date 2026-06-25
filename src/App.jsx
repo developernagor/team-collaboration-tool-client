@@ -13,6 +13,7 @@ import PhotoSend from "./components/shared/PhotoSend";
 import AllStudents from "./pages/AllStudents";
 import AddStudent from "./pages/AddStudent";
 import StudentDetails from "./StudentDetails";
+import AdminDashboard from "./AdminDashboard";
 
 
 function App() {
@@ -99,6 +100,15 @@ function App() {
               <AllStudents />
             }
           />
+
+          <Route
+            path="/admin-dashboard"
+            element={
+              <AdminDashboard />
+            }
+          />
+
+
           <Route
             path="/student/:id"
             element={

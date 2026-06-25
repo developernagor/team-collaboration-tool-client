@@ -14,6 +14,7 @@ export default function StudentDetails() {
   const [loading, setLoading] = useState(true);
 
   const [paymentData, setPaymentData] = useState({
+    studentName:"",
     amount: "",
     month: "",
     startDate: "",
@@ -64,6 +65,7 @@ export default function StudentDetails() {
       fetchPayments();
 
       setPaymentData({
+        studentName:"",
         amount: "",
         month: "",
         startDate: "",
@@ -354,6 +356,11 @@ doc.text("Thank you for your payment",105,289,{align: "center",});
 
 doc.save(`${student.studentName}-${payment.month}-Receipt.pdf`);};
 
+const totalPaymentsAmount = payments.reduce(
+  (sum, payment) => sum + Number(payment.amount || 0),
+  0
+);
+
 
   if (loading) return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
   if (!student) return <div>Student not found</div>;
@@ -458,6 +465,21 @@ doc.save(`${student.studentName}-${payment.month}-Receipt.pdf`);};
   </div>
         
       </div>
+
+
+      <div className="bg-green-100 border border-green-300 rounded-xl p-5 shadow">
+  <h3 className="text-lg font-semibold text-green-700">
+    Total Payments
+  </h3>
+
+  <p className="text-3xl font-bold text-green-900 mt-2">
+    ৳ {totalPaymentsAmount.toLocaleString()}
+  </p>
+
+  <p className="text-sm text-gray-600 mt-1">
+    Total amount received from this student
+  </p>
+</div>
 
       
 
