@@ -89,159 +89,235 @@ const formatDate = (dateStr) => {
   });
 };
 
-const generateReceipt = async(payment) => {
-  const doc = new jsPDF();
-  const qrData = {
-  receiptId: payment._id,
-  studentId: student._id,
-  name: student.studentName,
-  amount: payment.amount,
-  month: payment.month,
-  startDate: payment.startDate,
-  endDate: payment.endDate,
+const generateReceipt = async (payment) => {
+const doc = new jsPDF("p", "mm", "a4");
+
+const qrData = {
+receiptId: payment._id,
+studentId: student._id,
+studentName: student.studentName,
+amount: payment.amount,
+month: payment.month,
+paymentDate: payment.paidDate,
 };
-const qrCodeUrl = await QRCode.toDataURL(JSON.stringify(qrData));
 
-  // Header
-  doc.setFillColor(41, 128, 185);
-  doc.rect(0, 0, 210, 30, "F");
+const qrCodeUrl = await QRCode.toDataURL(
+JSON.stringify(qrData)
+);
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.text("MEHEDI EDUCARE PAYMENT RECEIPT", 105, 18, {
-    align: "center",
-  });
+const receiptNo = `MED-${new Date().getFullYear()}-${payment._id
+    ?.slice(-5)
+    .toUpperCase()}`;
 
-  // Reset color
-  doc.setTextColor(0, 0, 0);
-
-  // Receipt Info
-  doc.setFontSize(11);
-
-  doc.text(
-    `Receipt Date: ${new Date().toLocaleDateString()}`,
-    15,
-    45
-  );
-
-  doc.text(
-    `Receipt No: ${payment._id?.slice(-6) || "N/A"}`,
-    140,
-    45
-  );
-
-  // Student Info Box
-  doc.roundedRect(15, 55, 180, 40, 3, 3);
-
-  doc.setFontSize(14);
-  doc.text("Student Information", 20, 65);
-
-  doc.setFontSize(11);
-
-doc.text(`Name: ${student.studentName}`, 20, 75);
-doc.text(`Father's Name: ${student.fatherName || "N/A"}`, 20, 83);
-doc.text(`Mother's Name: ${student.motherName || "N/A"}`, 20, 91);
-
-  doc.text(
-    `Phone: ${student.phone}`,
-    110,
-    75
-  );
-
-    doc.text(
-    `School: ${student.schoolName || "N/A"}`,
-    110,
-    83
-  );
-
-  doc.text(
-    `Class: ${student.className || "N/A"}`,
-    110,
-    91
-  );
+const formatDate = (date) => {
+if (!date) return "N/A";
 
 
-
-  // Payment Details
-  doc.setFontSize(14);
-  doc.text("Payment Details", 20, 110);
-
-  doc.line(20, 114, 190, 114);
-
-  doc.setFontSize(11);
-
-  doc.text("Amount Paid:", 20, 125);
-  doc.text(`${payment.amount} taka`, 80, 125);
-
-  doc.text("Payment Method:", 20, 135);
-  doc.text(payment.paymentMethod, 80, 135);
-
-  doc.text("Paid Date:", 20, 145);
-  doc.text(
-    `${formatDate(payment.paidDate)}`, 80, 145);
-
-  doc.text("Payment Month:", 20, 155);
-  doc.text(payment.month, 80, 155);
-
-  doc.text("Coverage Period:", 20, 165);
-  doc.text(
-    `${formatDate(payment.startDate)} to ${formatDate(payment.endDate)}`,
-    80,
-    165
-  );
-
-  // Paid Badge
-  doc.setFillColor(46, 204, 113);
-  doc.roundedRect(150, 120, 40, 15, 2, 2, "F");
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(12);
-  doc.text("PAID", 170, 130, {
-    align: "center",
-  });
-
-  doc.setTextColor(0, 0, 0);
-
-  doc.addImage(qrCodeUrl, "PNG", 150, 150, 40, 40);
-  doc.setFontSize(10);
-doc.text("Scan to verify", 150, 150);
-
-  // Note
-  if (payment.note) {
-    doc.setFontSize(11);
-    doc.text("Note:", 20, 185);
-
-    doc.text(payment.note, 35, 185);
+return new Date(date).toLocaleDateString(
+  "en-GB",
+  {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   }
-
-  // Signature Section
-  doc.line(20, 245, 70, 245);
-  doc.line(140, 245, 190, 245);
-
-  doc.text("Guardian Signature", 20, 252);
-
-
-  doc.text("Authorized Signature", 140, 252);
-
-doc.text("Mehedi Hassan", 140, 242);
-
-  // Footer
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-
-  doc.text(
-    "Thank you for your payment.",
-    105,
-    280,
-    {
-      align: "center",
-    }
-  );
-
-  doc.save(
-    `${student.studentName}-${payment.month}.pdf`
-  );
+);
 };
+
+// HEADER
+doc.setFillColor(79, 70, 229);
+doc.rect(0, 0, 210, 35, "F");
+
+doc.setTextColor(255, 255, 255);
+
+doc.setFontSize(24);
+doc.setFont("helvetica", "bold");
+
+doc.text(
+"MEHEDI EDUCARE",105,14,{ align: "center" });
+
+doc.setFontSize(12);
+
+doc.text(
+"Student Tuition Payment Receipt",105,24,{ align: "center" });
+
+doc.setFontSize(10);
+
+doc.text(
+`Receipt No: ${receiptNo}`,15,30);
+
+doc.text(
+`Generated: ${formatDate(new Date())}`,195,30,{ align: "right" });
+
+// PAID BADGE
+
+doc.setFillColor(16, 185, 129);
+
+doc.roundedRect(155,42,35,12,3,3,"F");
+
+doc.setTextColor(255, 255, 255);
+
+doc.setFontSize(12);
+
+doc.text("PAID",172,50,{align: "center",});
+
+// STUDENT INFO CARD
+
+doc.setFillColor(248, 250, 252);
+
+doc.roundedRect(15,60,180,45,4,4,"F");
+
+doc.setDrawColor(220);
+
+doc.roundedRect(15,60,180,45,4,4);
+
+doc.setTextColor(0, 0, 0);
+
+doc.setFontSize(14);
+
+doc.setFont("helvetica", "bold");
+
+doc.text("Student Information",20,70);
+
+doc.setFontSize(11);
+
+doc.setFont("helvetica","normal");
+
+doc.text(`Name: ${student.studentName}`,20,80);
+
+doc.text(`Father: ${student.fatherName || "N/A" }`,20,88);
+
+doc.text(`Mother: ${student.motherName || "N/A" }`,20,96);
+
+doc.text(`Phone: ${student.phone || "N/A" }`,110,80);
+
+doc.text(`School: ${student.schoolName || "N/A" }`,110,88);
+
+doc.text(`Class: ${student.className || "N/A" }`,110,96);
+
+// AMOUNT CARD
+
+doc.setFillColor(239, 246, 255);
+
+doc.roundedRect(15,115,180,25,4,4,"F");
+
+doc.setFont("helvetica","bold");
+
+doc.setTextColor(37,99,235);
+doc.setFontSize(12);
+
+doc.text("TOTAL AMOUNT PAID",20,128);
+doc.setFontSize(24);
+
+doc.text(`${payment.amount} taka`,170,130,{align: "right",});
+
+// PAYMENT TABLE
+
+doc.setFillColor(79, 70, 229);
+
+doc.rect(15,150,180,10,"F");
+
+doc.setTextColor(255,255,255);
+
+doc.setFontSize(11);
+
+doc.text("Month",20,15);
+
+doc.text("Method",70,157);
+
+doc.text("Paid Date",110,157);
+
+doc.text("Amount",160,157);
+
+doc.setTextColor(0,0,0);
+
+doc.rect(15,160,180,14);
+
+doc.text(payment.month,20,169);
+
+doc.text(payment.paymentMethod,70,169);
+
+doc.text(formatDate(payment.paidDate),110,169);
+
+doc.text(`${payment.amount} taka`,160,169);
+
+// COVERAGE PERIOD
+
+doc.setFont("helvetica","bold");
+
+doc.text("Coverage Period",20,190);
+
+doc.setFont("helvetica","normal");
+
+doc.text(`${formatDate(payment.startDate)}  to  ${formatDate(payment.endDate)}`,20,198);
+
+// NOTE
+
+if (payment.note) {doc.setFont("helvetica","bold");
+
+```
+doc.text("Note",20,214);
+
+doc.setFont("helvetica","normal");
+
+const splitText = doc.splitTextToSize(payment.note,100);
+
+doc.text(splitText,20,222);
+```
+}
+
+// QR SECTION
+doc.setFillColor(255,255,255);
+
+doc.roundedRect(145,185,45,45,3,3,"F");
+
+doc.addImage(qrCodeUrl,"PNG",148,188,38,38);
+
+doc.setFontSize(9);
+
+doc.text("Scan to verify",167,233,{align: "center",});
+
+// WATERMARK
+
+doc.setTextColor(235,235,235);
+
+doc.setFontSize(45);
+
+doc.text("MEHEDI EDUCARE",105,155,{angle: 45,align: "center",});
+
+doc.setTextColor(0,0,0);
+
+// SIGNATURE
+
+doc.line(20,250,70,250);
+
+doc.line(140,250,190,250);
+
+doc.setFontSize(10);
+
+doc.text("Guardian Signature",20,257);
+
+doc.text("Authorized Signature",140,257);
+
+doc.setFont("helvetica","bold");
+
+doc.text("Mehedi Hassan Nagor",140,246);
+
+// FOOTER
+
+doc.setFillColor(31,41,55);
+
+doc.rect(0,275,210,22,"F");
+
+doc.setTextColor(255,255,255);
+
+doc.setFontSize(10);
+
+doc.text("MEHEDI EDUCARE",105,283,{align: "center",});
+
+doc.text("Thank you for your payment",105,289,{align: "center",});
+
+doc.save(`${student.studentName}-${payment.month}-Receipt.pdf`);};
+
 
   if (loading) return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
   if (!student) return <div>Student not found</div>;
