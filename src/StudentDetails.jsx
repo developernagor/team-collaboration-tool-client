@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router";
 import axios from "axios";
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
+import logo from "../src/assets/logo.png";
+
 
 export default function StudentDetails() {
   const { id } = useParams();
@@ -89,7 +91,31 @@ const formatDate = (dateStr) => {
   });
 };
 
+
+const getBase64Image = (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      resolve(canvas.toDataURL("image/png"));
+    };
+
+    img.onerror = reject;
+    img.src = url;
+  });
+};
+
+
 const generateReceipt = async (payment) => {
+  const logoBase64 = await getBase64Image(logo);
 const doc = new jsPDF("p", "mm", "a4");
 
 const qrData = {
@@ -126,6 +152,16 @@ return new Date(date).toLocaleDateString(
 // HEADER
 doc.setFillColor(79, 70, 229);
 doc.rect(0, 0, 210, 35, "F");
+
+// Add logo
+doc.addImage(
+  logoBase64,
+  "PNG",
+  10,   // X
+  5,    // Y
+  22,   // Width
+  22    // Height
+);
 
 doc.setTextColor(255, 255, 255);
 
