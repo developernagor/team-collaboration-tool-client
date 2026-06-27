@@ -14,6 +14,8 @@ import AllStudents from "./pages/AllStudents";
 import AddStudent from "./pages/AddStudent";
 import StudentDetails from "./StudentDetails";
 import AdminDashboard from "./AdminDashboard";
+import StudentDashboard from "./pages/Student/StudentDashboard";
+import StudentMessage from "./pages/Student/StudentMessage";
 
 
 function App() {
@@ -35,6 +37,24 @@ function App() {
             element={
               <PrivateRoute>
                 <Message />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/student-dashboard"
+            element={
+              <PrivateRoute>
+                <StudentDashboard />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/student-messages"
+            element={
+              <PrivateRoute>
+                <StudentMessage />
               </PrivateRoute>
             }
           />

@@ -11,7 +11,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/firebase.config";
 import PasswordGate from "../../components/PasswordGate";
 
-function Message() {
+function StudentMessage() {
   const [messages, setMessages] =
     useState([]);
 
@@ -136,7 +136,7 @@ useLayoutEffect(() => {
     async () => {
       try {
         const res = await fetch(
-          "https://team-collaboration-tool-server.vercel.app/messages"
+          "https://team-collaboration-tool-server.vercel.app/student-messages"
         );
 
         const data =
@@ -195,7 +195,7 @@ useLayoutEffect(() => {
 ) => {
   try {
     await fetch(
-      `https://team-collaboration-tool-server.vercel.app/messages/${messageId}/reaction`,
+      `https://team-collaboration-tool-server.vercel.app/student-messages/${messageId}/reaction`,
       {
         method: "PATCH",
         headers: {
@@ -223,7 +223,7 @@ useLayoutEffect(() => {
 
     try {
       const res = await fetch(
-        `https://team-collaboration-tool-server.vercel.app/messages/seen/${id}`,
+        `https://team-collaboration-tool-server.vercel.app/student-messages/seen/${id}`,
         {
           method: "PATCH",
 
@@ -266,7 +266,7 @@ useEffect(() => {
 
   const markAllSeen = async () => {
     await fetch(
-      "https://team-collaboration-tool-server.vercel.app/messages/mark-all-seen",
+      "https://team-collaboration-tool-server.vercel.app/student-messages/mark-all-seen",
       {
         method: "PATCH",
         headers: {
@@ -324,6 +324,9 @@ useEffect(() => {
           currentUser.email,
 
         createdAt: new Date(),
+        senderRole: "student",
+
+    room: "student",
 
         replyTo: replyingTo
     ? {
@@ -349,7 +352,7 @@ useEffect(() => {
       };
 // console.log("Sending:", messageData);
       const res = await fetch(
-        "https://team-collaboration-tool-server.vercel.app/messages",
+        "https://team-collaboration-tool-server.vercel.app/student-messages",
         {
           method: "POST",
 
@@ -438,8 +441,12 @@ setMessages((prev) => {
       <div className="bg-blue-500 text-white p-4 shadow-md">
       
   <h1 className="text-2xl font-bold">
-    Chat Room
-  </h1>
+    Student Community
+</h1>
+
+<p>
+Chat with your classmates.
+</p>
 
   
 
@@ -769,4 +776,4 @@ setMessages((prev) => {
   );
 }
 
-export default Message;
+export default StudentMessage;

@@ -9,6 +9,44 @@ import { auth } from "../../firebase/firebase.config";
 
 function Navbar() {
   const [user, setUser] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+const fetchUnreadCount = async () => {
+  if (!user?.email) return;
+
+  try {
+    const res = await fetch(
+      "https://team-collaboration-tool-server.vercel.app/messages"
+    );
+
+    const data = await res.json();
+
+    const unread = data.filter(
+      (msg) =>
+        msg.senderEmail !== user.email &&
+        !msg.seenBy?.some(
+          (seenUser) => seenUser.email === user.email
+        )
+    );
+
+    setUnreadCount(unread.length);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+
+
+useEffect(() => {
+  if (!user) return;
+
+  fetchUnreadCount();
+
+  const interval = setInterval(fetchUnreadCount, 5000);
+
+  return () => clearInterval(interval);
+}, [user]);
+
 
   // ✅ database user
   const [dbUser, setDbUser] = useState(null);
@@ -66,7 +104,18 @@ function Navbar() {
 if (dbUser?.role === "bondhu") {
   roleMenu = (
     <>
-      <Link to="/message">Message</Link>
+      <Link
+  to="/message"
+  className="relative"
+>
+  Message
+
+  {unreadCount > 0 && (
+    <span className="absolute -top-2 -right-4 bg-red-600 text-white text-[10px] min-w-5 h-5 rounded-full flex items-center justify-center">
+      {unreadCount}
+    </span>
+  )}
+</Link>
       <Link to="/photosend">📷 PhotoSend</Link>
       <Link to="/users">Active Status</Link>
       <Link to="/dashboard">Dashboard</Link>
@@ -78,6 +127,15 @@ if (dbUser?.role === "bondhu") {
       <Link to="/add-student">Add Student</Link>
       <Link to="/all-students">All Students</Link>
       <Link to="/admin-dashboard">Admin Dashboard</Link>
+    </>
+  );
+}
+else if (dbUser?.role === "student") {
+  roleMenu = (
+    <>
+      <Link to="/student-dashboard">Dashboard</Link>
+      <Link to="/student-messages">Message</Link>
+      
     </>
   );
 } else {
