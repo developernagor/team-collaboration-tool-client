@@ -22,21 +22,21 @@ export default function useSessionTracker(user) {
 
     startSession();
 
-    const endSession = () => {
-      navigator.sendBeacon(
-        "https://team-collaboration-tool-server.vercel.app/users/session/end",
-        new Blob(
-          [
-            JSON.stringify({
-              email: user.email,
-            }),
-          ],
-          {
-            type: "application/json",
-          }
-        )
-      );
-    };
+   const endSession = async () => {
+  await fetch(
+    "https://team-collaboration-tool-server.vercel.app/users/session/end",
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: user.email,
+      }),
+      keepalive: true,
+    }
+  );
+};
 
     window.addEventListener(
       "beforeunload",

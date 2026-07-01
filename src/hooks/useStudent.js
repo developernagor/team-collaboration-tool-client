@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase.config";
 
@@ -8,27 +9,29 @@ const useStudent = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log("Firebase User:", user);
       if (!user) {
         setLoading(false);
         return;
       }
+       console.log(user.email);
 
       try {
-        const res = await fetch(
-          `https://your-server.vercel.app/students/email/${user.email}`
+        const res = await axios.get(
+          `https://team-collaboration-tool-server.vercel.app/student-dashboard/${user.email}`
         );
+         console.log("API Response:", res.data);
 
-        const data = await res.json();
-
-        setStudent(data);
+        setStudent(res.data.user);
       } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
+        console.log(err.response?.status);
+  console.log(err.response?.data);
       }
+
+      setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   return { student, loading };

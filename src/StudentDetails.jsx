@@ -24,11 +24,6 @@ export default function StudentDetails() {
     note: "",
   });
 
-  useEffect(() => {
-    fetchStudent();
-    fetchPayments();
-  }, [id]);
-
   const fetchStudent = async () => {
     try {
       const res = await axios.get(
@@ -40,21 +35,49 @@ export default function StudentDetails() {
     }
   };
 
-  const fetchPayments = async () => {
-    const res = await axios.get(
-      `https://team-collaboration-tool-server.vercel.app/payments/${id}`
-    );
-    setPayments(res.data);
-  };
+
+  useEffect(() => {
+  fetchStudent();
+}, [id]);
+
+  useEffect(() => {
+  if (student?._id) {
+    fetchPayments(student._id);
+  }
+}, [student]);
+
+const fetchPayments = async (studentId) => {
+  const res = await axios.get(
+    `https://team-collaboration-tool-server.vercel.app/payments/student/${studentId}`
+  );
+
+  setPayments(res.data);
+  console.log(payments)
+};
+console.log(payments)
+
+  // const fetchPayments = async () => {
+  //   const res = await axios.get(
+  //     `https://team-collaboration-tool-server.vercel.app/payments/student/${student.studentId}`
+  //   );
+  //   setPayments(res.data);
+  // };
 
    const handlePayment = async (e) => {
     e.preventDefault();
 
-    const payload = {
-      studentId: id,
-      ...paymentData,
-      paidDate: paymentData.paymentDate,
-    };
+const payload = {
+  studentId: student._id, // <-- MongoDB _id
+  studentName: student.studentName,
+  amount: paymentData.amount,
+  month: paymentData.month,
+  startDate: paymentData.startDate,
+  endDate: paymentData.endDate,
+  paymentMethod: paymentData.paymentMethod,
+  note: paymentData.note,
+  paidDate: paymentData.paymentDate,
+  createdAt: new Date(),
+};
 
     const res = await axios.post(
       "https://team-collaboration-tool-server.vercel.app/payments",
@@ -62,7 +85,7 @@ export default function StudentDetails() {
     );
 
     if (res.data.insertedId) {
-      fetchPayments();
+      fetchPayments(student._id);
 
       setPaymentData({
         studentName:"",
@@ -70,6 +93,7 @@ export default function StudentDetails() {
         month: "",
         startDate: "",
         endDate: "",
+        paymentDate: "",
         paymentMethod: "Cash",
         note: "",
       });
@@ -585,7 +609,7 @@ const totalPaymentsAmount = payments.reduce(
                     <td>{payment.startDate} - {payment.endDate}</td>
                     <td>{payment.amount}</td>
                     <td>{payment.paymentMethod}</td>
-                    <td>{payment.paidDate}</td>
+                    <td>{formatDate(payment.paidDate)}</td>
                     <td>
                       <button
                         onClick={() => generateReceipt(payment)}

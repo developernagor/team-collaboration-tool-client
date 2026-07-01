@@ -16,6 +16,7 @@ import StudentDetails from "./StudentDetails";
 import AdminDashboard from "./AdminDashboard";
 import StudentDashboard from "./pages/Student/StudentDashboard";
 import StudentMessage from "./pages/Student/StudentMessage";
+import StudentRoute from "./pages/Student/StudentRoute";
 
 
 function App() {
@@ -44,9 +45,9 @@ function App() {
           <Route
             path="/student-dashboard"
             element={
-              <PrivateRoute>
+              <StudentRoute>
                 <StudentDashboard />
-              </PrivateRoute>
+              </StudentRoute>
             }
           />
 

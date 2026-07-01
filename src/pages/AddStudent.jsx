@@ -7,6 +7,7 @@ function AddStudent() {
     fatherName: "",
     motherName: "",
     phone: "",
+    email: "",
     whatsapp: "",
     guardianPhone: "",
     address: "",
@@ -17,6 +18,9 @@ function AddStudent() {
     monthlySalary: "",
     salaryDate: "",
     paymentStatus: "Unpaid",
+    gender: "",
+  dateOfBirth: "",
+  bloodGroup: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -46,6 +50,7 @@ function AddStudent() {
         fatherName: "",
         motherName: "",
         phone: "",
+        email: "",
         guardianPhone: "",
         address: "",
         note: "",
@@ -55,6 +60,9 @@ function AddStudent() {
         monthlySalary: "",
         salaryDate: "",
         paymentStatus: "Unpaid",
+        gender: "",
+  dateOfBirth: "",
+  bloodGroup: "",
       });
     } catch (error) {
       console.log(error);
@@ -143,6 +151,87 @@ function AddStudent() {
                     className="input input-bordered w-full"
                   />
                 </div>
+
+                <div className="form-control">
+  <label className="label">
+    <span className="label-text">Student Email</span>
+  </label>
+
+  <input
+    type="email"
+    name="email"
+    placeholder="student@gmail.com"
+    value={formData.email}
+  onChange={handleChange}
+    className="input input-bordered"
+    required
+  />
+</div>
+
+{/* Gender */}
+  <div>
+    <label className="label">
+      <span className="label-text font-semibold">
+        Gender
+      </span>
+    </label>
+
+    <select
+      name="gender"
+      value={formData.gender}
+      onChange={handleChange}
+      className="select select-bordered w-full"
+    >
+      <option value="">Select Gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+
+  {/* Date of Birth */}
+  <div>
+    <label className="label">
+      <span className="label-text font-semibold">
+        Date of Birth
+      </span>
+    </label>
+
+    <input
+      type="date"
+      name="dateOfBirth"
+      value={formData.dateOfBirth}
+      onChange={handleChange}
+      className="input input-bordered w-full"
+    />
+  </div>
+
+  {/* Blood Group */}
+  <div>
+    <label className="label">
+      <span className="label-text font-semibold">
+        Blood Group
+      </span>
+    </label>
+
+    <select
+      name="bloodGroup"
+      value={formData.bloodGroup}
+      onChange={handleChange}
+      className="select select-bordered w-full"
+    >
+      <option value="">Select Blood Group</option>
+      <option value="A+">A+</option>
+      <option value="A-">A-</option>
+      <option value="B+">B+</option>
+      <option value="B-">B-</option>
+      <option value="AB+">AB+</option>
+      <option value="AB-">AB-</option>
+      <option value="O+">O+</option>
+      <option value="O-">O-</option>
+    </select>
+  </div>
+
               </div>
 
               <div className="divider"></div>
