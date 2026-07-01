@@ -5,6 +5,7 @@ import axios from "axios";
 function StudentDashboard() {
   const { student, loading } = useStudent();
   const [payments, setPayments] = useState([]);
+  const [attendance, setAttendance] = useState([]);
 
 
 useEffect(() => {
@@ -24,7 +25,17 @@ console.log(student);
 // console.log("student.studentId:", student.studentId);
 // console.log("student._id:", student._id);
 
+useEffect(() => {
+  if (!student?._id) return;
 
+  axios
+    .get(
+      `https://team-collaboration-tool-server.vercel.app/attendance/student/${student._id}`
+    )
+    .then((res) => {
+      setAttendance(res.data);
+    });
+}, [student]);
 
 
   const hour = new Date().getHours();
@@ -83,6 +94,53 @@ if (!student?.admissionDate) {
 };
 
 const dueInfo = calculateDue(); 
+
+const present = attendance.filter(
+  (a) => a.status === "Present"
+).length;
+
+const absent = attendance.filter(
+  (a) => a.status === "Absent"
+).length;
+
+const late = attendance.filter(
+  (a) => a.status === "Late"
+).length;
+
+const leave = attendance.filter(
+  (a) => a.status === "Leave"
+).length;
+
+const total = attendance.length;
+
+const percentage =
+  total === 0
+    ? 0
+    : Math.round(((present + late) / total) * 100);
+
+
+    const currentMonth = new Date().getMonth();
+const currentYear = new Date().getFullYear();
+
+const monthlyAttendance = attendance.filter((item) => {
+  const d = new Date(item.date);
+
+  return (
+    d.getMonth() === currentMonth &&
+    d.getFullYear() === currentYear
+  );
+});
+
+const monthlyPresent = monthlyAttendance.filter(
+  (item) => item.status === "Present"
+).length;
+
+const monthlyRate =
+  monthlyAttendance.length > 0
+    ? Math.round((monthlyPresent / monthlyAttendance.length) * 100)
+    : 0;
+
+    
 
   if (loading) {
     return (
@@ -372,6 +430,198 @@ const dueInfo = calculateDue();
     {" "}৳ {dueInfo.due}
   </span>
 </p>
+</div>
+
+{/* Monthly Attendance Rate */}
+<div className="bg-base-100 rounded-2xl shadow-xl mt-8 p-6 text-base-content">
+
+  <h2 className="text-2xl font-bold mb-6">
+    📅 Monthly Attendance
+  </h2>
+
+  <div className="grid md:grid-cols-3 gap-5">
+
+    <div className="bg-blue-100 rounded-xl p-5">
+      <h3 className="font-semibold text-blue-700">
+        This Month
+      </h3>
+
+      <p className="text-xl font-bold text-blue-900">
+        {new Date().toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        })}
+      </p>
+    </div>
+
+    <div className="bg-green-100 rounded-xl p-5">
+      <h3 className="font-semibold text-green-700">
+        Present
+      </h3>
+
+      <p className="text-3xl font-bold text-green-900">
+        {monthlyPresent}
+      </p>
+    </div>
+
+    <div className="bg-purple-100 rounded-xl p-5">
+      <h3 className="font-semibold text-purple-700">
+        Attendance Rate
+      </h3>
+
+      <p className="text-3xl font-bold text-purple-900">
+        {monthlyRate}%
+      </p>
+    </div>
+
+  </div>
+
+  <progress
+    className="progress progress-success w-full h-4 mt-6"
+    value={monthlyRate}
+    max="100"
+  ></progress>
+
+</div>
+
+{/* Attendance Summary */}
+<div className="bg-base-100 rounded-2xl shadow-xl mt-8 p-6">
+
+  <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+    📅 Attendance Summary
+  </h2>
+
+  <div className="grid md:grid-cols-4 gap-4">
+
+    <div className="bg-green-100 rounded-xl p-5">
+      <h3 className="font-semibold text-green-700">
+        Present
+      </h3>
+
+      <p className="text-3xl font-bold text-green-900">
+        {present}
+      </p>
+    </div>
+
+    <div className="bg-red-100 rounded-xl p-5">
+      <h3 className="font-semibold text-red-700">
+        Absent
+      </h3>
+
+      <p className="text-3xl font-bold text-red-900">
+        {absent}
+      </p>
+    </div>
+
+    <div className="bg-yellow-100 rounded-xl p-5">
+      <h3 className="font-semibold text-yellow-700">
+        Late
+      </h3>
+
+      <p className="text-3xl font-bold text-yellow-900">
+        {late}
+      </p>
+    </div>
+
+    <div className="bg-blue-100 rounded-xl p-5">
+      <h3 className="font-semibold text-blue-700">
+        Leave
+      </h3>
+
+      <p className="text-3xl font-bold text-blue-900">
+        {leave}
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+{/* Attendance Rate */}
+<div className="bg-base-100 rounded-2xl shadow-xl mt-8 p-6">
+
+  <h2 className="text-xl font-bold mb-5 text-gray-900 dark:text-white">
+    Attendance Rate
+  </h2>
+
+  <progress
+    className="progress progress-success w-full h-4"
+    value={percentage}
+    max="100"
+  ></progress>
+
+  <p className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+    {percentage}% Attendance
+  </p>
+
+</div>
+
+{/* Attendance History */}
+<div className="bg-base-100 rounded-2xl shadow-xl mt-8">
+
+  <div className="p-6 border-b">
+
+    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+      Attendance History
+    </h2>
+
+  </div>
+
+  <div className="overflow-x-auto">
+
+    <table className="table text-gray-900 dark:text-white">
+
+      <thead className="text-gray-900 dark:text-white">
+
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {attendance.length > 0 ? (
+          attendance.map((item, index) => (
+            <tr key={item._id}>
+              <td>{index + 1}</td>
+              <td>{formatDate(item.date)}</td>
+              <td>
+                <span
+                  className={`badge ${
+                    item.status === "Present"
+                      ? "badge-success"
+                      : item.status === "Absent"
+                      ? "badge-error"
+                      : item.status === "Late"
+                      ? "badge-warning"
+                      : "badge-info"
+                  }`}
+                >
+                  {item.status}
+                </span>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td
+              colSpan="3"
+              className="text-center py-8 text-gray-900 dark:text-white"
+            >
+              No attendance found.
+            </td>
+          </tr>
+        )}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
 </div>
 
 </div>

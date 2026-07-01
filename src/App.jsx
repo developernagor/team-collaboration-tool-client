@@ -17,6 +17,7 @@ import AdminDashboard from "./AdminDashboard";
 import StudentDashboard from "./pages/Student/StudentDashboard";
 import StudentMessage from "./pages/Student/StudentMessage";
 import StudentRoute from "./pages/Student/StudentRoute";
+import AdminAttendance from "./Admin/AdminAttendance";
 
 
 function App() {
@@ -119,6 +120,13 @@ function App() {
             path="/all-students"
             element={
               <AllStudents />
+            }
+          />
+
+          <Route
+            path="/student-attendance"
+            element={
+              <AdminAttendance />
             }
           />
 
