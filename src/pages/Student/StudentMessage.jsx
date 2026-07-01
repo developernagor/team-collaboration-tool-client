@@ -434,7 +434,7 @@ setMessages((prev) => {
 };
 
   return (
-    <PasswordGate>
+    
     <div className="h-screen flex flex-col bg-gray-100">
 
       {/* HEADER */}
@@ -772,7 +772,7 @@ Chat with your classmates.
         </button>
       </form>
     </div>
-    </PasswordGate>
+    
   );
 }
 
