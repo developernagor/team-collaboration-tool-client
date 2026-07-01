@@ -173,7 +173,7 @@ const dueInfo = calculateDue();
 </div>
 
 
-<div className="mt-8 bg-base-100 rounded-3xl shadow-xl p-6">
+<div className="mt-8 bg-base-100 rounded-3xl shadow-xl p-6 text-gray-900 dark:text-white">
 
   <div className="flex items-center justify-between mb-6">
     <h2 className="text-2xl font-bold">
@@ -188,64 +188,66 @@ const dueInfo = calculateDue();
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
     <div>
-      <p className="text-sm text-gray-500">Full Name</p>
-      <h3 className="font-semibold text-lg">
-        {student.studentName || "N/A"}
-      </h3>
-    </div>
+  <p className="text-sm text-gray-500 dark:text-gray-400">
+    Full Name
+  </p>
+  <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+    {student.studentName || "N/A"}
+  </h3>
+</div>
 
     <div>
       <p className="text-sm text-gray-500">Email</p>
-      <h3 className="font-semibold text-lg">
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
         {student.email}
       </h3>
     </div>
 
     <div>
       <p className="text-sm text-gray-500">Phone</p>
-      <h3 className="font-semibold text-lg">
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
         {student.phone || "Not Added"}
       </h3>
     </div>
 
     <div>
       <p className="text-sm text-gray-500">Role</p>
-      <h3 className="font-semibold text-lg capitalize">
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
         {student.role}
       </h3>
     </div>
 
     <div>
       <p className="text-sm text-gray-500">Gender</p>
-      <h3 className="font-semibold text-lg">
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
         {student.gender || "N/A"}
       </h3>
     </div>
 
     <div>
       <p className="text-sm text-gray-500">Date of Birth</p>
-      <h3 className="font-semibold text-lg">
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
         {student.dateOfBirth || "N/A"}
       </h3>
     </div>
 
     <div>
       <p className="text-sm text-gray-500">Blood Group</p>
-      <h3 className="font-semibold text-lg">
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
         {student.bloodGroup || "N/A"}
       </h3>
     </div>
 
     <div>
       <p className="text-sm text-gray-500">Address</p>
-      <h3 className="font-semibold text-lg">
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
         {student.address || "N/A"}
       </h3>
     </div>
 
     <div>
   <p className="text-sm text-gray-500">Joining Date</p>
-  <h3 className="font-semibold text-lg">
+  <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
     {student.admissionDate
       ? new Date(student.admissionDate).toLocaleDateString("en-GB")
       : "N/A"}
@@ -261,8 +263,8 @@ const dueInfo = calculateDue();
     💳 Payment Overview
   </h2>
 
-  <div className="bg-red-100 border border-red-300 rounded-xl p-5 shadow mt-5">
-  <h3 className="text-lg font-semibold text-red-700">
+<div className="bg-red-100 border border-red-300 rounded-xl p-5 shadow mt-5">
+  <h3 className="text-lg font-semibold text-red-800">
     Due Amount
   </h3>
 
@@ -270,128 +272,80 @@ const dueInfo = calculateDue();
     ৳ {dueInfo.due.toLocaleString()}
   </p>
 
-  <div className="mt-3 text-sm space-y-1">
-    <p>
-      Admission: {formatDate(student.admissionDate)}
-    </p>
-
-    <p>
-      Total Months: {dueInfo.totalMonths}
-    </p>
-
-    <p>
-      Total Fee: ৳ {dueInfo.totalFee.toLocaleString()}
-    </p>
-
-    <p>
-      Paid: ৳ {dueInfo.totalPaid.toLocaleString()}
-    </p>
+  <div className="mt-3 text-sm text-gray-800 space-y-1">
+    <p>Admission: {formatDate(student.admissionDate)}</p>
+    <p>Total Months: {dueInfo.totalMonths}</p>
+    <p>Total Fee: ৳ {dueInfo.totalFee.toLocaleString()}</p>
+    <p>Paid: ৳ {dueInfo.totalPaid.toLocaleString()}</p>
   </div>
 </div>
+
 </div>
 
-<div className="bg-base-100 shadow-xl rounded-2xl mt-8 p-6">
+<div className="bg-base-100 text-base-content shadow-xl rounded-2xl mt-8 p-6">
+  <h2 className="text-xl font-bold mb-5">
+    Payment Progress
+  </h2>
 
-    <h2 className="text-xl font-bold mb-5">
-        Payment Progress
+ <progress
+    className="progress progress-success w-full h-4"
+    value={dueInfo.totalPaid}
+    max={dueInfo.totalFee || 1}
+  />
+
+  <div className="flex justify-between mt-3 text-sm font-medium">
+    <span className="text-green-600">
+      Paid: ৳ {dueInfo.totalPaid.toLocaleString()}
+    </span>
+
+    <span className="text-red-600">
+      Due: ৳ {dueInfo.due.toLocaleString()}
+    </span>
+  </div>
+</div>
+
+<div className="bg-base-100 text-base-content rounded-2xl shadow-xl mt-8">
+  <div className="p-6 border-b border-base-300">
+    <h2 className="text-2xl font-bold">
+      Recent Payments
     </h2>
+  </div>
 
-    <progress
-  className="progress progress-success w-full h-4"
-  value={dueInfo.totalPaid}
-  max={dueInfo.totalFee || 1}
-/>
+  <div className="overflow-x-auto">
+    <table className="table text-base-content">
+      <thead className="text-base-content">
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Month</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
 
-<div className="flex justify-between mt-3 text-sm">
-  <span>Paid: ৳ {dueInfo.totalPaid}</span>
-  <span>Due: ৳ {dueInfo.due}</span>
-</div>
-
-</div>
-
-<div className="bg-base-100 rounded-2xl shadow-xl mt-8">
-
-    <div className="p-6 border-b">
-
-        <h2 className="text-2xl font-bold">
-            Recent Payments
-        </h2>
-
-    </div>
-
-    <div className="overflow-x-auto">
-
-        <table className="table">
-
-            <thead>
-
-                <tr>
-
-                    <th>#</th>
-
-                    <th>Date</th>
-
-                    <th>Month</th>
-
-                    <th>Amount</th>
-
-                    <th>Status</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {payments.length > 0 ? (
-
-                    payments.map((payment, index) => (
-
-                        <tr key={payment._id}>
-
-                            <td>{index + 1}</td>
-
-                            <td>{formatDate(payment.paidDate)}</td>
-
-                            <td>{payment.month}</td>
-
-                            <td>
-                                ৳ {payment.amount}
-                            </td>
-
-                            <td>
-
-                                <span className="badge badge-success">
-                                    Paid
-                                </span>
-
-                            </td>
-
-                        </tr>
-
-                    ))
-
-                ) : (
-
-                    <tr>
-
-                        <td
-                            colSpan="5"
-                            className="text-center py-8"
-                        >
-                            No payment history found.
-                        </td>
-
-                    </tr>
-
-                )}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
+      <tbody className="text-base-content">
+        {payments.length > 0 ? (
+          payments.map((payment, index) => (
+            <tr key={payment._id}>
+              <td>{index + 1}</td>
+              <td>{formatDate(payment.paidDate)}</td>
+              <td>{payment.month}</td>
+              <td>৳ {payment.amount}</td>
+              <td>
+                <span className="badge badge-success">Paid</span>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="5" className="text-center py-8">
+              No payment history found.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 
