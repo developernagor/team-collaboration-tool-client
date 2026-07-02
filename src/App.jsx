@@ -18,6 +18,7 @@ import StudentDashboard from "./pages/Student/StudentDashboard";
 import StudentMessage from "./pages/Student/StudentMessage";
 import StudentRoute from "./pages/Student/StudentRoute";
 import AdminAttendance from "./Admin/AdminAttendance";
+import AddNotice from "./Admin/AddNotice";
 
 
 function App() {
@@ -129,6 +130,11 @@ function App() {
               <AdminAttendance />
             }
           />
+
+          <Route
+  path="/add-notice"
+  element={<AddNotice />}
+/>
 
           <Route
             path="/admin-dashboard"

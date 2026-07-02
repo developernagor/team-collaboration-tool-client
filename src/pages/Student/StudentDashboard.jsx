@@ -6,6 +6,9 @@ function StudentDashboard() {
   const { student, loading } = useStudent();
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
+  const [notices, setNotices] = useState([]);
+
+
 
 
 useEffect(() => {
@@ -36,6 +39,13 @@ useEffect(() => {
       setAttendance(res.data);
     });
 }, [student]);
+
+useEffect(() => {
+  axios
+    .get("https://team-collaboration-tool-server.vercel.app/notices")
+    .then((res) => setNotices(res.data))
+    .catch(console.error);
+}, []);
 
 
   const hour = new Date().getHours();
@@ -314,6 +324,47 @@ const monthlyRate =
 
   </div>
 
+</div>
+
+
+{/* Notice */}
+<div className="mt-8">
+  <h2 className="text-2xl font-bold mb-5">
+    📢 Latest Notices
+  </h2>
+
+  <div className="space-y-4">
+    {notices.length > 0 ? (
+      notices.map((notice) => (
+        <div
+          key={notice._id}
+          className="bg-base-100 shadow-xl rounded-2xl border-l-4 border-primary p-6"
+        >
+          <div className="flex justify-between items-start">
+            <h3 className="text-xl font-bold text-base-content">
+  {notice.title}
+</h3>
+
+            <span className="badge badge-primary">
+              Notice
+            </span>
+          </div>
+
+          <p className="mt-3 text-base-content">
+  {notice.description}
+</p>
+
+<div className="mt-4 text-sm text-base-content/70">
+  📅 {new Date(notice.createdAt).toLocaleString()}
+</div>
+        </div>
+      ))
+    ) : (
+      <div className="alert">
+        No notices available.
+      </div>
+    )}
+  </div>
 </div>
 
 <div className="mt-8">
