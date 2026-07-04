@@ -5,6 +5,18 @@ import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import logo from "../src/assets/logo.png";
 
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  LineChart,
+  Line,
+} from "recharts";
+
 
 export default function StudentDetails() {
   const { id } = useParams();
@@ -23,6 +35,15 @@ export default function StudentDetails() {
     paymentMethod: "Cash",
     note: "",
   });
+
+  const monthlyChartData = payments
+  .sort((a, b) => new Date(a.paidDate) - new Date(b.paidDate))
+  .map((payment) => ({
+    month: payment.month,
+    amount: Number(payment.amount),
+  }));
+
+
 
   const fetchStudent = async () => {
     try {
@@ -582,6 +603,35 @@ const totalPaymentsAmount = payments.reduce(
         </div>
       </div>
 
+
+{/* Payment Chart */}
+<div className="card bg-base-100 shadow-xl mb-8">
+  <div className="card-body">
+    <h2 className="card-title">
+      Monthly Payment Chart
+    </h2>
+
+    <div style={{ width: "100%", height: 350 }}>
+      <ResponsiveContainer>
+        <BarChart data={monthlyChartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+
+          <XAxis dataKey="month" />
+
+          <YAxis />
+
+          <Tooltip />
+
+          <Bar
+            dataKey="amount"
+            fill="#4F46E5"
+            radius={[8, 8, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+</div>
 
 
 {/* Payment History */}

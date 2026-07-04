@@ -14,6 +14,7 @@ export default function AddNotice() {
     description: "",
     category: "General",
     important: false,
+     sendSMS: false,
   });
 
   const [notices, setNotices] = useState([]);
@@ -46,6 +47,7 @@ export default function AddNotice() {
       description: "",
       category: "General",
       important: false,
+       sendSMS: false,
     });
   };
 
@@ -59,7 +61,7 @@ export default function AddNotice() {
         await axios.patch(`${SERVER}/notices/${editing}`, form);
         toast.success("Notice Updated");
       } else {
-        await axios.post(`${SERVER}/notices`, form);
+        await axios.post(`${SERVER}/send-notice`, form);
         toast.success("Notice Published");
       }
 
@@ -190,6 +192,17 @@ export default function AddNotice() {
             <span>Important Notice</span>
 
           </label>
+
+          <label className="label cursor-pointer justify-start gap-4">
+  <input
+    type="checkbox"
+    className="checkbox checkbox-success"
+    name="sendSMS"
+    checked={form.sendSMS}
+    onChange={handleChange}
+  />
+  <span>Send SMS to Students</span>
+</label>
 
           <div className="flex gap-3">
 

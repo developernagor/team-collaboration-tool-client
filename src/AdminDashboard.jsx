@@ -20,6 +20,42 @@ const [recentStudents, setRecentStudents] =
     .catch(console.error);
 }, []);
 
+const [upcomingStudents, setUpcomingStudents] = useState([]);
+useEffect(() => {
+  axios
+    .get("https://team-collaboration-tool-server.vercel.app/students")
+    .then((res) => {
+      const today = new Date();
+
+      const upcoming = res.data
+        .map((student) => {
+          const dueDate = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            Number(student.salaryDate)
+          );
+
+          // If this month's due date has already passed,
+          // move it to next month
+          if (dueDate < today) {
+            dueDate.setMonth(dueDate.getMonth() + 1);
+          }
+
+          const diffDays = Math.ceil(
+            (dueDate - today) / (1000 * 60 * 60 * 24)
+          );
+
+          return {
+            ...student,
+            dueDate,
+            diffDays,
+          };
+        })
+        .sort((a, b) => a.diffDays - b.diffDays);
+
+      setUpcomingStudents(upcoming);
+    });
+}, []);
 
 const [topStudents, setTopStudents] =
   useState([]);
@@ -49,6 +85,16 @@ useEffect(() => {
       console.log(err);
       setLoading(false);
     });
+}, []);
+
+useEffect(() => {
+  axios
+    .get("https://team-collaboration-tool-server.vercel.app/top-paying-students")
+    .then((res) => {
+      console.log(res.data); // <-- Check this
+      setTopStudents(res.data);
+    })
+    .catch(console.error);
 }, []);
 
 
@@ -135,8 +181,8 @@ if (loading) {
       <td>{student.className}</td>
 
       <td className="text-green-600 font-bold">
-        ৳ {student.totalPaid.toLocaleString()}
-      </td>
+  ৳ {Number(student.totalPaid || 0).toLocaleString()}
+</td>
     </tr>
   ))}
 </tbody>
@@ -278,6 +324,57 @@ if (loading) {
         ))}
       </tbody>
     </table>
+  </div>
+</div>
+
+{/* Upcoming Payments */}
+<div className="card bg-base-100 shadow-xl mt-8">
+  <div className="card-body">
+    <h2 className="card-title">
+      Upcoming Payment Dates
+    </h2>
+
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Phone</th>
+            <th>Monthly Fee</th>
+            <th>Due Date</th>
+            <th>Remaining</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {upcomingStudents.slice(0, 10).map((student) => (
+            <tr key={student._id}>
+              <td>{student.studentName}</td>
+              <td>{student.guardianPhone}</td>
+              <td>৳ {student.monthlySalary}</td>
+
+              <td>
+                {student.dueDate.toLocaleDateString()}
+              </td>
+
+              <td>
+                <span
+                  className={`badge ${
+                    student.diffDays <= 3
+                      ? "badge-error"
+                      : student.diffDays <= 7
+                      ? "badge-warning"
+                      : "badge-success"
+                  }`}
+                >
+                  {student.diffDays} days
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
