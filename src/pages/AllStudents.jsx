@@ -21,12 +21,68 @@ function AllStudents() {
       console.log(error);
     }
   };
+  console.log(students)
 
-  const filteredStudents = students.filter((student) =>
+  const activeStudents = students.filter(
+  (student) => student.status === "active"
+);
+
+const inactiveStudents = students.filter(
+  (student) => student.status === "inactive"
+);
+
+ const filteredStudents = students.filter((student) => {
+  const keyword = search.toLowerCase();
+
+  return (
     student.studentName
       ?.toLowerCase()
-      .includes(search.toLowerCase())
+      .includes(keyword) ||
+    student.phone?.includes(keyword) ||
+    student.className
+      ?.toLowerCase()
+      .includes(keyword)
   );
+});
+
+  const toggleStatus = async (student) => {
+  try {
+    const updatedStatus =
+      student.status === "active"
+        ? "inactive"
+        : "active";
+
+    await axios.patch(
+      `https://team-collaboration-tool-server.vercel.app/students/${student._id}`,
+      {
+        status: updatedStatus,
+      }
+    );
+
+    fetchStudents();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const deleteStudent = async (id) => {
+  const ok = window.confirm(
+    "Are you sure?"
+  );
+
+  if (!ok) return;
+
+  try {
+    await axios.delete(
+      `https://team-collaboration-tool-server.vercel.app/students/${id}`
+    );
+
+    fetchStudents();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 py-10 px-4">
@@ -51,14 +107,26 @@ function AllStudents() {
           <div className="card bg-white shadow-xl">
             <div className="card-body text-center">
               <h2 className="text-lg font-semibold">
-                Total Students
+                Active Students
               </h2>
 
               <p className="text-4xl font-bold text-primary">
-                {students.length}
+                {activeStudents.length}
               </p>
             </div>
           </div>
+
+          <div className="card bg-white shadow-xl">
+  <div className="card-body text-center">
+    <h2 className="text-lg font-semibold">
+      Inactive Students
+    </h2>
+
+    <p className="text-4xl font-bold text-error">
+      {inactiveStudents.length}
+    </p>
+  </div>
+</div>
 
           <div className="card bg-white shadow-xl">
             <div className="card-body text-center">
@@ -122,8 +190,9 @@ function AllStudents() {
                     <th>#</th>
                     <th>Name</th>
                     <th>Class</th>
+                    <th>Status</th>
                     <th>Admission Date</th>
-                    <th>Salary Date</th>
+                    
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -143,25 +212,58 @@ function AllStudents() {
                           {student.className ||
                             "N/A"}
                         </td>
+                        <td>
+  <span
+    className={`badge ${
+      student.status === "active"
+        ? "badge-success"
+        : "badge-error"
+    }`}
+  >
+    {student.status}
+  </span>
+</td>
 
                         <td>
                           {student.admissionDate ||
                             "N/A"}
                         </td>
 
-                        <td>
-                          {student.salaryDate ||
-                            "N/A"}
-                        </td>
+<td>
+  <div className="flex gap-2 flex-wrap">
 
-                        <td>
-                          <Link
-                            to={`/student/${student._id}`}
-                            className="btn btn-info btn-sm"
-                          >
-                            View Details
-                          </Link>
-                        </td>
+    <Link
+      to={`/student/${student._id}`}
+      className="btn btn-info btn-sm"
+    >
+      View
+    </Link>
+
+    <Link
+      to={`/edit-student/${student._id}`}
+      className="btn btn-warning btn-sm"
+    >
+      Edit
+    </Link>
+
+    <button
+      className="btn btn-error btn-sm"
+      onClick={() => deleteStudent(student._id)}
+    >
+      Delete
+    </button>
+
+    <button
+      className="btn btn-success btn-sm"
+      onClick={() => toggleStatus(student)}
+    >
+      {student.status === "active"
+        ? "Inactive"
+        : "Active"}
+    </button>
+
+  </div>
+</td>
                       </tr>
                     )
                   )}

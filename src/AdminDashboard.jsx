@@ -36,7 +36,7 @@ useEffect(() => {
     .then((res) => {
       const today = new Date();
 
-      const upcoming = res.data
+      const upcoming = res.data.filter((student) => student.status !== "inactive")
         .map((student) => {
           const dueDate = new Date(
             today.getFullYear(),
