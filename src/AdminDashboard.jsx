@@ -20,6 +20,15 @@ const [recentStudents, setRecentStudents] =
     .catch(console.error);
 }, []);
 
+const [dueStudents, setDueStudents] = useState([]);
+
+useEffect(() => {
+  axios
+    .get("https://team-collaboration-tool-server.vercel.app/due-payments")
+    .then((res) => setDueStudents(res.data))
+    .catch(console.error);
+}, []);
+
 const [upcomingStudents, setUpcomingStudents] = useState([]);
 useEffect(() => {
   axios
@@ -319,6 +328,43 @@ if (loading) {
               <button className="btn btn-xs btn-outline btn-primary">
                 Receipt
               </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+ {/* Due Payments  */}
+<div className="mt-8">
+  <h2 className="text-2xl font-bold mb-4">
+    Payment Due Students
+  </h2>
+
+  <div className="overflow-x-auto bg-white rounded-xl shadow">
+    <table className="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Phone</th>
+          <th>Due Date</th>
+          <th>Monthly Fee</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {dueStudents.map((student, index) => (
+          <tr key={student._id}>
+            <td>{index + 1}</td>
+            <td>{student.studentName}</td>
+            <td>{student.className}</td>
+            <td>{student.guardianPhone}</td>
+            <td>{student.salaryDate}</td>
+            <td className="text-red-600 font-bold">
+              ৳ {student.monthlySalary}
             </td>
           </tr>
         ))}
