@@ -139,6 +139,8 @@ const formatDate = (dateStr) => {
 };
 
 
+
+
 const getBase64Image = (url) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -406,6 +408,45 @@ const totalPaymentsAmount = payments.reduce(
   0
 );
 
+const calculateDue = () => {
+  if (!student?.admissionDate) {
+    return {
+      totalMonths: 0,
+      totalFee: 0,
+      totalPaid: 0,
+      due: 0,
+    };
+  }
+
+  const admission = new Date(student.admissionDate);
+  const today = new Date();
+
+  const totalMonths =
+    (today.getFullYear() - admission.getFullYear()) * 12 +
+    (today.getMonth() - admission.getMonth()) +
+    1;
+
+  const monthlyFee = Number(student.monthlySalary || 0);
+
+  const totalFee = totalMonths * monthlyFee;
+
+  const totalPaid = payments.reduce(
+    (sum, payment) => sum + Number(payment.amount || 0),
+    0
+  );
+
+  const due = Math.max(totalFee - totalPaid, 0);
+
+  return {
+    totalMonths,
+    totalFee,
+    totalPaid,
+    due,
+  };
+};
+
+const dueInfo = calculateDue();
+
 
   if (loading) return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
   if (!student) return <div>Student not found</div>;
@@ -523,6 +564,95 @@ const totalPaymentsAmount = payments.reduce(
 
   <p className="text-sm text-gray-600 mt-1">
     Total amount received from this student
+  </p>
+</div>
+
+<div className="mt-8">
+  <h2 className="text-2xl font-bold mb-5">
+    💳 Payment Overview
+  </h2>
+
+  <div className="bg-red-100 border border-red-300 rounded-xl p-5 shadow">
+    <h3 className="text-lg font-semibold text-red-800">
+      Due Amount
+    </h3>
+
+    <p className="text-3xl font-bold text-red-900 mt-2">
+      ৳ {dueInfo.due.toLocaleString()}
+    </p>
+
+    <div className="mt-3 text-sm text-gray-800 space-y-1">
+      <p>
+        Admission: {formatDate(student.admissionDate)}
+      </p>
+
+      <p>
+        Total Months: {dueInfo.totalMonths}
+      </p>
+
+      <p>
+        Monthly Fee: ৳{" "}
+        {Number(student.monthlySalary).toLocaleString()}
+      </p>
+
+      <p>
+        Total Fee: ৳{" "}
+        {dueInfo.totalFee.toLocaleString()}
+      </p>
+
+      <p>
+        Paid: ৳{" "}
+        {dueInfo.totalPaid.toLocaleString()}
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<div className="bg-base-100 shadow-xl rounded-2xl mt-8 p-6">
+  <h2 className="text-xl font-bold mb-5">
+    Payment Progress
+  </h2>
+
+  <progress
+    className="progress progress-success w-full h-4"
+    value={dueInfo.totalPaid}
+    max={dueInfo.totalFee || 1}
+  />
+
+  <div className="flex justify-between mt-3 text-sm font-medium">
+    <span className="text-green-600">
+      Paid: ৳ {dueInfo.totalPaid.toLocaleString()}
+    </span>
+
+    <span className="text-red-600">
+      Due: ৳ {dueInfo.due.toLocaleString()}
+    </span>
+  </div>
+</div>
+
+<div className="mt-8 bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-2xl text-white p-8 shadow-xl">
+
+  <h2 className="text-2xl font-bold">
+    Payment Summary
+  </h2>
+
+  <p className="mt-3 text-lg">
+    You have paid
+    <span className="font-bold">
+      {" "}৳ {dueInfo.totalPaid.toLocaleString()}
+    </span>
+    {" "}out of
+    <span className="font-bold">
+      {" "}৳ {dueInfo.totalFee.toLocaleString()}
+    </span>
+  </p>
+
+  <p className="mt-2">
+    Remaining Due: 
+    <span className="font-bold text-yellow-300">
+      {" "}৳ {dueInfo.due.toLocaleString()}
+    </span>
   </p>
 </div>
 

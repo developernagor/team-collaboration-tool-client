@@ -128,6 +128,7 @@ if (dbUser?.role === "bondhu") {
       <Link to="/all-students">All Students</Link>
       <Link to="/student-attendance">Student Attendance</Link>
       <Link to="/add-notice">Notice Management</Link>
+      <Link to="/add-exam">Add Exam</Link>
       <Link to="/admin-dashboard">Admin Dashboard</Link>
     </>
   );

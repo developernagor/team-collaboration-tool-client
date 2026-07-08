@@ -20,6 +20,7 @@ import StudentRoute from "./pages/Student/StudentRoute";
 import AdminAttendance from "./Admin/AdminAttendance";
 import AddNotice from "./Admin/AddNotice";
 import EditStudent from "./pages/Student/EditStudent";
+import AddExam from "./Admin/AddExam";
 
 
 function App() {
@@ -135,6 +136,11 @@ function App() {
           <Route
   path="/add-notice"
   element={<AddNotice />}
+/>
+
+   <Route
+  path="/add-exam"
+  element={<AddExam />}
 />
 
           <Route

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import loginLottie from "../../assets/loginLottie.json";
+import { toast } from "react-toastify";
 import Lottie from "lottie-react";
 import { Link, useNavigate } from "react-router";
 import {
@@ -13,75 +14,81 @@ function Register() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const SERVER = "https://team-collaboration-tool-server.vercel.app";
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleRegister = async (e) => {
+  e.preventDefault();
 
-    const form = e.target;
+  setLoading(true);
+  setError("");
 
-    const name = form.name.value.trim();
-    const email = form.email.value.trim().toLowerCase();
-    const password = form.password.value.trim();
-    const confirmPassword = form.confirmPassword.value.trim();
+  const form = e.target;
 
-    // validation
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+  const name = form.name.value.trim();
+  const email = form.email.value.trim().toLowerCase();
+  const password = form.password.value.trim();
+  const confirmPassword = form.confirmPassword.value.trim();
 
-    setLoading(true);
+  if (password.length < 6) {
+    setError("Password must be at least 6 characters");
+    setLoading(false);
+    return;
+  }
 
-    try {
-      // 1. Firebase user create
-      const result = await createUserWithEmailAndPassword(
-        auth,
+  if (password !== confirmPassword) {
+    setError("Passwords do not match");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const result = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    await updateProfile(result.user, {
+      displayName: name,
+    });
+
+    const res = await fetch(`${SERVER}/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        uid: result.user.uid,
+        name,
         email,
-        password
-      );
-      console.log(result)
+        role: "user",
+        createdAt: new Date().toISOString(),
+      }),
+    });
 
-      // 2. Update profile
-      await updateProfile(result.user, {
-        displayName: name,
-      });
+    const data = await res.json();
 
-      // 3. Save user to MongoDB
-      await fetch("https://team-collaboration-tool-server.vercel.app/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          uid: result.user.uid,
-          
-        }),
-      });
-      const data = await res.json(); 
-      console.log("Mongo response:", data)
-      if (!res.ok || data.success === false) {
-  throw new Error(data.message || "Failed to save user");
-}
-
-      form.reset();
-
-      // redirect
-      navigate("/login");
-    } catch (err) {
-      if (err.code === "auth/email-already-in-use") {
-        setError("Email already exists");
-      } else if (err.code === "auth/weak-password") {
-        setError("Password must be at least 6 characters");
-      } else {
-        setError("Registration failed");
-      }
-    } finally {
-      setLoading(false);
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || "Failed to save user");
     }
-  };
+
+    toast.success("Registration successful");
+
+    form.reset();
+
+    navigate("/login");
+  } catch (err) {
+    if (err.code === "auth/email-already-in-use") {
+      setError("Email already exists");
+    } else if (err.code === "auth/weak-password") {
+      setError("Password must be at least 6 characters");
+    } else {
+      setError(err.message || "Registration failed");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="hero bg-base-200 min-h-screen">
