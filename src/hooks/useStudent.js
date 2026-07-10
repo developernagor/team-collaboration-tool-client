@@ -18,11 +18,11 @@ const useStudent = () => {
 
       try {
         const res = await axios.get(
-          `https://team-collaboration-tool-server.vercel.app/student-dashboard/${user.email}`
+          `https://team-collaboration-tool-server.vercel.app/student-dashboard/email/${user.email}`
         );
          console.log("API Response:", res.data);
 
-        setStudent(res.data.user);
+        setStudent(res.data);
       } catch (err) {
         console.log(err.response?.status);
   console.log(err.response?.data);

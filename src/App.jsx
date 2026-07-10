@@ -21,6 +21,12 @@ import AdminAttendance from "./Admin/AdminAttendance";
 import AddNotice from "./Admin/AddNotice";
 import EditStudent from "./pages/Student/EditStudent";
 import AddExam from "./Admin/AddExam";
+import ExamRoutine from "./Exam/ExamRoutine";
+import AddResult from "./Exam/AddResult";
+import ResultList from "./Exam/ResultList";
+import SubjectManagement from "./Exam/SubjectManagement";
+import Marksheet from "./pages/Marksheet";
+import StudentResult from "./Exam/StudentResult";
 
 
 function App() {
@@ -138,10 +144,21 @@ function App() {
   element={<AddNotice />}
 />
 
-   <Route
-  path="/add-exam"
-  element={<AddExam />}
+ <Route path="/add-exam" element={<AddExam />} />
+<Route path="/subject-management" element={<SubjectManagement />} />
+<Route path="/exam-routine" element={<ExamRoutine />} />
+<Route path="/add-result" element={<AddResult />} />
+<Route path="/result-list" element={<ResultList />} />
+<Route
+  path="/marksheet/:studentId/:examId"
+  element={<Marksheet />}
 />
+<Route
+  path="/student-result"
+  element={<StudentResult />}
+/>
+{/* <Route path="/student-result" element={<StudentResult />} /> */}
+
 
           <Route
             path="/admin-dashboard"

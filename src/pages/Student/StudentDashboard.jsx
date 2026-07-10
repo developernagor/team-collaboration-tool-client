@@ -7,6 +7,7 @@ function StudentDashboard() {
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [notices, setNotices] = useState([]);
+  const [results, setResults] = useState([]);
 
 
 
@@ -25,6 +26,22 @@ useEffect(() => {
 }, [student]);
 
 console.log(student);
+
+useEffect(() => {
+  if (!student?._id) return;
+
+  axios
+    .get(
+      `https://team-collaboration-tool-server.vercel.app/student-results/${student._id}`
+    )
+    .then((res) => {
+      setResults(res.data);
+    })
+    .catch(console.error);
+
+}, [student]);
+
+
 // console.log("student.studentId:", student.studentId);
 // console.log("student._id:", student._id);
 
@@ -673,6 +690,80 @@ const monthlyRate =
 
   </div>
 
+</div>
+
+{/* Student Results */}
+<div className="bg-base-100 text-base-content rounded-2xl shadow-xl mt-8 p-6">
+  <h2 className="text-2xl font-bold mb-5">
+    📚 Examination Results
+  </h2>
+
+  {results?.length > 0 ? (
+    results.map((item) => (
+      <div
+        key={item._id}
+        className="border border-base-300 rounded-xl p-5 mb-5 bg-base-200"
+      >
+        <h3 className="text-xl font-bold text-primary">
+          {item.examName}
+        </h3>
+
+        <div className="grid md:grid-cols-4 gap-4 mt-4">
+          <div>
+            <p className="text-sm text-gray-500">GPA</p>
+            <p className="font-bold">{item.gpa}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Grade</p>
+            <p className="font-bold">{item.grade}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Total</p>
+            <p className="font-bold">{item.total}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Position</p>
+            <p className="font-bold">{item.meritPosition}</p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto mt-5">
+          <table className="table table-zebra">
+            <thead className="bg-primary text-primary-content">
+              <tr>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Grade</th>
+                <th>GPA</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {item.subjects?.map((sub, i) => (
+                <tr key={i}>
+                  <td>{sub.subject}</td>
+                  <td>{sub.marks}</td>
+                  <td>
+                    <span className="badge badge-success">
+                      {sub.grade}
+                    </span>
+                  </td>
+                  <td>{sub.gpa}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center py-6 text-gray-500">
+      No Result Published Yet.
+    </p>
+  )}
 </div>
 
 </div>

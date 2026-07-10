@@ -128,7 +128,55 @@ if (dbUser?.role === "bondhu") {
       <Link to="/all-students">All Students</Link>
       <Link to="/student-attendance">Student Attendance</Link>
       <Link to="/add-notice">Notice Management</Link>
-      <Link to="/add-exam">Add Exam</Link>
+      <>
+  <details className="dropdown">
+    <summary className="cursor-pointer">
+      Result Management
+    </summary>
+
+    <ul className="p-2 shadow bg-base-100 rounded-box w-64 z-50">
+      <li>
+        <Link to="/add-exam">Add Exam</Link>
+      </li>
+
+      <li>
+        <Link to="/subject-management">
+          Subject Management
+        </Link>
+      </li>
+
+      <li>
+        <Link to="/exam-routine">
+          Exam Routine
+        </Link>
+      </li>
+
+      <li>
+        <Link to="/add-result">
+          Add Result
+        </Link>
+      </li>
+
+      <li>
+        <Link to="/result-list">
+          Result List
+        </Link>
+      </li>
+
+      {/* <li>
+        <Link to="/marksheet">
+          Marksheet
+        </Link>
+      </li> */}
+
+      <li>
+        <Link to="/student-result">
+          Student Result
+        </Link>
+      </li>
+    </ul>
+  </details>
+</>
       <Link to="/admin-dashboard">Admin Dashboard</Link>
     </>
   );
