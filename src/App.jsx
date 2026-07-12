@@ -27,6 +27,8 @@ import ResultList from "./Exam/ResultList";
 import SubjectManagement from "./Exam/SubjectManagement";
 import Marksheet from "./pages/Marksheet";
 import StudentResult from "./Exam/StudentResult";
+import SearchResult from "./Exam/SearchResult";
+import UserManagement from "./Admin/UserManagement";
 
 
 function App() {
@@ -57,6 +59,15 @@ function App() {
             element={
               <StudentRoute>
                 <StudentDashboard />
+              </StudentRoute>
+            }
+          />
+
+          <Route
+            path="/search-result"
+            element={
+              <StudentRoute>
+                <SearchResult />
               </StudentRoute>
             }
           />
@@ -149,6 +160,8 @@ function App() {
 <Route path="/exam-routine" element={<ExamRoutine />} />
 <Route path="/add-result" element={<AddResult />} />
 <Route path="/result-list" element={<ResultList />} />
+<Route path="/dashboard/users" element={<UserManagement />} />
+
 <Route
   path="/marksheet/:studentId/:examId"
   element={<Marksheet />}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect,useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -13,9 +13,15 @@ export default function AddResult() {
 const [results, setResults] = useState([]);
 // const [marksData, setMarksData] = useState([]);
 const [saving, setSaving] = useState(false);
+const [loadingStudents, setLoadingStudents] =
+  useState(false);
 
   const [selectedExam, setSelectedExam] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
+  const exam = exams.find((e) => e._id === selectedExam);
+
+const isSubjectExam =
+  exam?.examScope === "Subject Exam";
 
 // useEffect(() => {
 //   if (!selectedClass) return;
@@ -45,24 +51,18 @@ const [saving, setSaving] = useState(false);
     setSubjects(res.data);
   };
 
-  const classSubjects =
+const classSubjects = useMemo(() => {
+  if (isSubjectExam) {
+    return exam?.subject ? [exam.subject] : [];
+  }
+
+  return (
     subjects.find(
       (item) => item.className === selectedClass
-    )?.subjects || [];
+    )?.subjects || []
+  );
+}, [subjects, selectedClass, exam, isSubjectExam]);
 
-const loadStudents = async () => {
-  try {
-    const res = await axios.get(`${SERVER}/students`);
-
-    const filtered = res.data.filter(
-      (student) => student.className === selectedClass
-    );
-
-    setStudents(filtered);
-  } catch (err) {
-    console.log(err);
-  }
-};
 
 // Calculate Total Marks
 const calculateTotal = (marks) => {
@@ -107,13 +107,28 @@ const getSubjectGrade = (marks) => {
 };
 
 const calculateFinalResult = (subjects) => {
+  // Subject Exam
+  if (isSubjectExam) {
+    const result = getSubjectGrade(subjects[0].marks);
 
+    return {
+      subjects: [
+        {
+          ...subjects[0],
+          grade: result.grade,
+          gpa: result.gpa,
+        },
+      ],
+      finalGpa: result.gpa,
+      status: result.gpa === 0 ? "Fail" : "Pass",
+    };
+  }
+
+  // Full Exam
   let totalGpa = 0;
-
   let hasFail = false;
 
   const updatedSubjects = subjects.map((item) => {
-
     const result = getSubjectGrade(item.marks);
 
     if (result.gpa === 0) hasFail = true;
@@ -130,8 +145,6 @@ const calculateFinalResult = (subjects) => {
   const finalGpa = hasFail
     ? 0
     : Number((totalGpa / updatedSubjects.length).toFixed(2));
-
-
 
   return {
     subjects: updatedSubjects,
@@ -174,6 +187,7 @@ const highestSubjectMarks = (subjects) => {
 
 
 
+
 const handleSave = async () => {
   if (!selectedExam)
     return toast.error("Select Exam");
@@ -184,74 +198,115 @@ const handleSave = async () => {
   try {
     setSaving(true);
 
-    const exam = exams.find(
-      (e) => e._id === selectedExam
+    const exists = await axios.get(
+      `${SERVER}/results/check`,
+      {
+        params: {
+          examId: selectedExam,
+          className: selectedClass,
+        },
+      }
     );
 
-const payload = [...results]
-  .map((student) => {
+    if (exists.data.exists) {
+      toast.error(
+        "Results already published for this class."
+      );
+      return;
+    }
 
-    const total = calculateTotal(student.marks);
-    const average = Number(calculateAverage(student.marks));
-  const finalResult = calculateFinalResult(student.marks);
-    const division = calculateDivision(average);
+    const payload = [...results]
+      .map((student) => {
+        const total = calculateTotal(student.marks);
 
-const failCount = failedSubjects(student.marks);
+        const average = Number(
+          calculateAverage(student.marks)
+        );
 
-const percentage = passPercentage(student.marks);
+        const finalResult = calculateFinalResult(
+          student.marks
+        );
 
-const highestMarks = highestSubjectMarks(
-  student.marks
-);
+        const division = isSubjectExam
+          ? null
+          : calculateDivision(average);
 
-    return {
-  examId: selectedExam,
-  examName: exams.find(
-    (e) => e._id === selectedExam
-  )?.examName,
+        const failCount = failedSubjects(
+          student.marks
+        );
 
-  className: selectedClass,
+        const percentage = isSubjectExam
+          ? null
+          : passPercentage(student.marks);
 
-  studentId: student.studentId,
-  studentName: student.studentName,
+        const highestMarks = isSubjectExam
+          ? Number(student.marks[0].marks)
+          : highestSubjectMarks(student.marks);
 
-  subjects: finalResult.subjects,
+        return {
+          examId: selectedExam,
+          examName: exam.examName,
 
+          examScope: exam.examScope,
+          subject: exam.subject || null,
 
-  total,
-  average,
+          className: selectedClass,
 
-  grade:getFinalGrade(finalResult.finalGpa),
-  gpa: finalResult.finalGpa,
+          studentId: student.studentId,
+          studentName: student.studentName,
 
-  status: finalResult.status,
+          subjects: finalResult.subjects,
 
-  division,
-  failedSubjects: failCount,
-  passPercentage: percentage,
-  highestSubjectMarks: highestMarks,
+          roll: student.roll,
+          registration: student.registration,
 
-  createdAt: new Date(),
-};
-  })
+          year: exam.year,
 
-  // Sort by Total Marks
-  .sort((a, b) => b.total - a.total)
+          total,
+          average,
 
-  // Assign Position
-  .map((student, index) => ({
-    ...student,
-    meritPosition: index + 1,
-     topper: index === 0,
-  }));
-  console.log("Payload:", payload);
+          grade: getFinalGrade(
+            finalResult.finalGpa
+          ),
+
+          gpa: finalResult.finalGpa,
+
+          status: finalResult.status,
+
+          division,
+
+          failedSubjects: failCount,
+
+          passPercentage: percentage,
+
+          highestSubjectMarks: highestMarks,
+
+          createdAt: new Date(),
+        };
+      })
+      .sort((a, b) => b.total - a.total)
+      .map((student, index) => ({
+        ...student,
+        meritPosition: index + 1,
+        topper: index === 0,
+      }));
+
+    console.log(payload);
 
     await axios.post(
       `${SERVER}/results`,
       payload
     );
 
-    toast.success("Results Saved Successfully");
+    toast.success(
+      "Results Saved Successfully"
+    );
+
+    setResults([]);
+    setStudents([]);
+    setSelectedExam("");
+    setSelectedClass("");
+
   } catch (err) {
     console.log(err);
     toast.error("Failed to save");
@@ -262,10 +317,13 @@ const highestMarks = highestSubjectMarks(
 
 useEffect(() => {
   if (!students.length || !classSubjects.length) return;
+  if (results.length > 0) return;
 
   const sheet = students.map((student) => ({
     studentId: student._id,
     studentName: student.studentName,
+    roll: student.roll,
+    registration: student.registration,
     marks: classSubjects.map((subject) => ({
       subject,
       marks: "",
@@ -273,8 +331,17 @@ useEffect(() => {
   }));
 
   setResults(sheet);
+}, [students, classSubjects, results.length]);
 
-}, [students, classSubjects]);
+useEffect(() => {
+  setResults([]);
+}, [selectedClass, selectedExam]);
+
+const allMarksFilled = results.every((student) =>
+  student.marks.every(
+    (subject) => subject.marks !== ""
+  )
+);
 
 const handleMarkChange = (
   studentIndex,
@@ -283,10 +350,33 @@ const handleMarkChange = (
 ) => {
   const updated = [...results];
 
-  updated[studentIndex].marks[subjectIndex].marks =
-    Number(value);
+const mark = Math.max(
+  0,
+  Math.min(100, Number(value))
+);
+
+updated[studentIndex].marks[subjectIndex].marks =
+  mark;
 
   setResults(updated);
+};
+
+
+
+const loadStudents = async () => {
+  try {
+    setLoadingStudents(true);
+
+    const res = await axios.get(`${SERVER}/students`);
+
+    setStudents(
+      res.data.filter(
+        (s) => s.className === selectedClass
+      )
+    );
+  } finally {
+    setLoadingStudents(false);
+  }
 };
 
 
@@ -391,274 +481,210 @@ const handleMarkChange = (
 //   }
 // };
 
+const availableExams = exams.filter((item) =>
+  selectedClass
+    ? item.classes?.includes(selectedClass)
+    : true
+);
+
 
   return (
     <div className="max-w-7xl mx-auto p-6">
 
-      <h2 className="text-3xl font-bold mb-8">
-        Add Result
-      </h2>
+      <div className="bg-base-100 rounded-2xl shadow-xl p-6 mb-6">
+
+  <h1 className="text-3xl font-bold">
+    📚 Add Examination Result
+  </h1>
+
+  <p className="text-gray-500 mt-2">
+    Select an examination and enter marks for students.
+  </p>
+
+</div>
 
       <div className="grid md:grid-cols-3 gap-5">
+<div className="bg-base-100 rounded-2xl shadow-lg p-6 mb-8">
 
-        {/* Exam */}
+  <div className="grid md:grid-cols-4 gap-4">
 
-        <select
-          className="select select-bordered"
-          value={selectedExam}
-          onChange={(e)=>setSelectedExam(e.target.value)}
-        >
-          <option value="">Select Exam</option>
+    {/* Select Class */}
 
-          {exams.map((exam)=>(
-            <option
-              key={exam._id}
-              value={exam._id}
-            >
-              {exam.examName}
-            </option>
-          ))}
+    <select
+  className="select select-bordered w-full"
+  value={selectedClass}
+  onChange={(e) => {
+    setSelectedClass(e.target.value);
+    setSelectedExam("");
+  }}
+>
+  <option value="">Select Class</option>
 
-        </select>
+  {[1,2,3,4,5,6,7,8,9,10].map((cls) => (
+    <option key={cls} value={String(cls)}>
+      Class {cls}
+    </option>
+  ))}
+</select>
 
-        {/* Class */}
+{/* Select Exam */}
+     <select
+  className="select select-bordered w-full"
+  value={selectedExam}
+  onChange={(e) => setSelectedExam(e.target.value)}
+>
+  <option value="">Select Exam</option>
 
-        <select
-          className="select select-bordered"
-          value={selectedClass}
-          onChange={(e)=>setSelectedClass(e.target.value)}
-        >
-          <option value="">
-            Select Class
-          </option>
+  {availableExams.map((exam) => (
+    <option
+      key={exam._id}
+      value={exam._id}
+    >
+      {exam.examName}
+      {exam.examScope === "Subject Exam"
+        ? ` (${exam.subject})`
+        : " (Full Exam)"}
+    </option>
+  ))}
+</select>
 
-          {[1,2,3,4,5,6,7,8,9,10].map((cls)=>(
-            <option key={cls}>
-              {cls}
-            </option>
-          ))}
 
-        </select>
 
-        {/* Subject */}
-        <table className="table table-zebra">
+   
 
-<thead>
-  <tr>
-    <th>#</th>
-    <th>Student Name</th>
+    <div className="stats shadow">
 
-    {classSubjects.map((subject) => (
-      <th key={subject}>{subject}</th>
-    ))}
+      <div className="stat">
 
-    <th>Total</th>
-    <th>Average</th>
-    <th>GPA</th>
-    <th>Grade</th>
-    <th>Status</th>
-  </tr>
-</thead>
+        <div className="stat-title">
+          Students
+        </div>
 
-<tbody>
-  {results.map((student, studentIndex) => {
+        <div className="stat-value text-primary">
+          {students.length}
+        </div>
 
- const total = calculateTotal(student.marks);
-const average = Number(calculateAverage(student.marks));
+      </div>
 
-const finalResult = calculateFinalResult(student.marks);
+    </div>
 
-    return (
-      <tr key={student.studentId}>
+    <div className="stats shadow">
 
-        <td>{studentIndex + 1}</td>
+      <div className="stat">
 
-        <td>{student.studentName}</td>
+        <div className="stat-title">
+          Subjects
+        </div>
 
-        {student.marks.map((mark, subjectIndex) => (
-          <td key={subjectIndex}>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              className="input input-bordered input-sm w-20"
-              value={mark.marks}
-              onChange={(e) =>
-                handleMarkChange(
-                  studentIndex,
-                  subjectIndex,
-                  e.target.value
-                )
-              }
-            />
-          </td>
-        ))}
+        <div className="stat-value text-success">
+          {classSubjects.length}
+        </div>
 
-        <td>{total}</td>
+      </div>
 
-        <td>{average.toFixed(2)}</td>
+    </div>
 
-        <td>{finalResult.finalGpa.toFixed(2)}</td>
-        <td>
-          <span className="badge badge-primary">
-           {finalResult.finalGpa === 5
-  ? "A+"
-  : finalResult.finalGpa >= 4
-  ? "A"
-  : finalResult.finalGpa >= 3.5
-  ? "A-"
-  : finalResult.finalGpa >= 3
-  ? "B"
-  : finalResult.finalGpa >= 2
-  ? "C"
-  : finalResult.finalGpa >= 1
-  ? "D"
-  : "F"}
-          </span>
-        </td>
+  </div>
 
-        <td>
-          <span
-            className={`badge ${
-              finalResult.status === "Pass"
-                ? "badge-success"
-                : "badge-error"
-            }`}
-          >
-            {finalResult.status}
-          </span>
-        </td>
+</div>
 
-      </tr>
-    );
-  })}
-</tbody>
-
-</table>
-
-{/* {students.length > 0 && (
-  <div className="overflow-x-auto mt-10">
-
+{selectedClass && classSubjects.length > 0 && (
+  <div className="overflow-x-auto mt-8 bg-base-100 rounded-2xl shadow-lg p-5">
     <table className="table table-zebra">
-
       <thead>
-
         <tr>
           <th>#</th>
-          <th>Student</th>
-          <th>Roll</th>
-          <th>Marks</th>
-          <th>Grade</th>
+          <th>Student Name</th>
+
+          {classSubjects.map((subject) => (
+            <th key={subject}>{subject}</th>
+          ))}
+
+          <th>Total</th>
+          {!isSubjectExam && <th>Average</th>}
           <th>GPA</th>
+          <th>Grade</th>
           <th>Status</th>
         </tr>
-
       </thead>
 
       <tbody>
+        {results.map((student, studentIndex) => {
+          const finalResult = calculateFinalResult(student.marks);
 
-        {marksData.map((item, index) => (
+          const total = calculateTotal(student.marks);
 
-          <tr key={item.studentId}>
+          const average = calculateAverage(student.marks);
 
-            <td>{index + 1}</td>
+          return (
+            <tr key={student.studentId}>
+              <td>{studentIndex + 1}</td>
 
-            <td>{item.studentName}</td>
+              <td className="font-semibold">
+                {student.studentName}
+              </td>
 
-            <td>{item.roll}</td>
+              {student.marks.map((subject, subjectIndex) => (
+                <td key={subject.subject}>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="input input-bordered input-sm w-20"
+                    value={subject.marks}
+                    onChange={(e) =>
+                      handleMarkChange(
+                        studentIndex,
+                        subjectIndex,
+                        e.target.value
+                      )
+                    }
+                  />
+                </td>
+              ))}
 
-            <td>
+              <td className="font-bold">
+                {total}
+              </td>
 
-              <input
-                type="number"
-                className="input input-bordered input-sm w-24"
-                value={item.marks}
-                onChange={(e) =>
-                  updateMarks(
-                    item.studentId,
-                    e.target.value
-                  )
-                }
-              />
+              {!isSubjectExam && <td>{average}</td>}
 
-            </td>
+              <td>{finalResult.finalGpa}</td>
 
-            <td>{item.grade}</td>
+              <td>{getFinalGrade(finalResult.finalGpa)}</td>
 
-            <td>{item.gpa}</td>
-
-            <td>
-              <span
-                className={`badge ${
-                  item.status === "Pass"
-                    ? "badge-success"
-                    : "badge-error"
-                }`}
-              >
-                {item.status}
-              </span>
-            </td>
-
-          </tr>
-
-        ))}
-
+              <td>
+                <span
+                  className={`badge ${
+                    finalResult.status === "Pass"
+                      ? "badge-success"
+                      : "badge-error"
+                  }`}
+                >
+                  {finalResult.status}
+                </span>
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
-
     </table>
-
   </div>
-)} */}
-
-       
-        {/* <div className="overflow-x-auto mt-8">
-  <table className="table table-zebra">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Student Name</th>
-        <th>{selectedSubject || "Marks"}</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {results.map((student, index) => (
-        <tr key={student.studentId}>
-          <td>{index + 1}</td>
-
-          <td>{student.studentName}</td>
-
-          <td>
-            <input
-              type="number"
-              className="input input-bordered w-24"
-              min="0"
-              max="100"
-              value={student.marks}
-              onChange={(e) => {
-                const updated = [...results];
-                updated[index].marks = e.target.value;
-                setResults(updated);
-              }}
-            />
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div> */}
+)}
 
 <div className="mt-8 flex justify-end">
 
   <button
-    onClick={handleSave}
-    disabled={saving}
-    className="btn btn-success btn-lg"
-  >
-    {saving
-      ? "Saving..."
-      : "💾 Save All Results"}
-  </button>
+  onClick={handleSave}
+  disabled={
+    saving ||
+    loadingStudents ||
+    !allMarksFilled
+  }
+  className="btn btn-success btn-lg"
+>
+  {saving ? "Saving..." : "💾 Save All Results"}
+</button>
 
 </div>
 

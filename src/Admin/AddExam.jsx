@@ -9,11 +9,14 @@ export default function AddExam() {
   const [exams, setExams] = useState([]);
   const classOptions = ["1","2","3","4","5","6","7","8","9","10",];
 const [editingId, setEditingId] = useState(null);
+
  const [formData, setFormData] = useState({
   examName: "",
   examCode: "",
   examType: "Monthly Test",
   year: new Date().getFullYear(),
+  examScope: "Full Exam", // Full Exam | Subject Exam
+  subject: "",
 
   startDate: "",
   endDate: "",
@@ -35,6 +38,25 @@ const [editingId, setEditingId] = useState(null);
   useEffect(() => {
     fetchExams();
   }, []);
+
+  const subjectOptions = [
+  "Bangla",
+  "English",
+  "Mathematics",
+  "Higher Mathematics",
+  "General Science",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "ICT",
+  "Religion",
+  "Accounting",
+  "Finance",
+  "Business Entrepreneurship",
+  "Economics",
+  "Geography",
+  "History",
+];
 
   const fetchExams = async () => {
     try {
@@ -80,6 +102,12 @@ const handleChange = (e) => {
 
 if (!formData.examCode.trim())
   return toast.error("Exam Code is required");
+if (
+  formData.examScope === "Subject Exam" &&
+  !formData.subject
+) {
+  return toast.error("Please select subject");
+}
 
 if (formData.classes.length === 0)
   return toast.error("Select at least one class");
@@ -166,6 +194,9 @@ const handleEdit = (exam) => {
     examType: exam.examType || "Monthly Test",
     year: exam.year || new Date().getFullYear(),
 
+    examScope: exam.examScope || "Full Exam",
+    subject: exam.subject || "",
+
     startDate: exam.startDate || "",
     endDate: exam.endDate || "",
     resultPublishDate: exam.resultPublishDate || "",
@@ -185,12 +216,17 @@ const handleEdit = (exam) => {
 };
 
 
-  const resetForm = () => {
+const resetForm = () => {
+  setEditingId(null);
+
   setFormData({
     examName: "",
     examCode: generateExamCode(),
     examType: "Monthly Test",
     year: new Date().getFullYear(),
+
+    examScope: "Full Exam",
+    subject: "",
 
     startDate: "",
     endDate: "",
@@ -257,6 +293,37 @@ const handleEdit = (exam) => {
     <option>Annual</option>
     <option>Final</option>
   </select>
+
+  <div>
+  <label>Exam Scope</label>
+
+  <select
+    name="examScope"
+    value={formData.examScope}
+    onChange={handleChange}
+  >
+    <option>Full Exam</option>
+    <option>Subject Exam</option>
+  </select>
+</div>
+
+{formData.examScope === "Subject Exam" && (
+<div>
+  <label>Subject</label>
+
+  <select
+    name="subject"
+    value={formData.subject}
+    onChange={handleChange}
+  >
+    <option value="">Select Subject</option>
+
+    {subjectOptions.map(sub=>(
+      <option key={sub}>{sub}</option>
+    ))}
+  </select>
+</div>
+)}
 
   <input
     type="number"
@@ -444,6 +511,7 @@ const handleEdit = (exam) => {
 />
 
         <div className="flex gap-3 mt-8">
+    
 
   <button
     className="btn btn-primary"
@@ -476,6 +544,7 @@ const handleEdit = (exam) => {
     <th>Exam</th>
     <th>Code</th>
     <th>Type</th>
+    <th>Scope</th>
     <th>Classes</th>
     <th>Schedule</th>
     <th>Marks</th>
@@ -506,10 +575,16 @@ const handleEdit = (exam) => {
       </td>
 
       <td>{exam.examType}</td>
+      <td>
+  {exam.examScope === "Subject Exam"
+    ? exam.subject
+    : "All Subjects"}
+</td>
 
       <td>
         {exam.classes?.join(", ")}
       </td>
+
 
       <td>
         <div>

@@ -128,6 +128,7 @@ if (dbUser?.role === "bondhu") {
       <Link to="/all-students">All Students</Link>
       <Link to="/student-attendance">Student Attendance</Link>
       <Link to="/add-notice">Notice Management</Link>
+      <Link to="/dashboard/users">User Management</Link>
       <>
   <details className="dropdown">
     <summary className="cursor-pointer">
@@ -186,6 +187,7 @@ else if (dbUser?.role === "student") {
     <>
       <Link to="/student-dashboard">Dashboard</Link>
       <Link to="/student-messages">Message</Link>
+      <Link to="/search-result">Search Result</Link>
       
     </>
   );
