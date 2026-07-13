@@ -72,7 +72,7 @@ export default function AdminAttendance() {
 setTodayAttendance(attendanceRes.data);
 
     alert("Attendance saved!");
-    console.log(res.data);
+    // console.log(res.data);
   } catch (error) {
     alert(error.response?.data?.message || "Failed");
   }

@@ -14,13 +14,13 @@ const useStudent = () => {
         setLoading(false);
         return;
       }
-       console.log(user.email);
+      //  console.log(user.email);
 
       try {
         const res = await axios.get(
           `https://team-collaboration-tool-server.vercel.app/student-dashboard/email/${user.email}`
         );
-         console.log("API Response:", res.data);
+        //  console.log("API Response:", res.data);
 
         setStudent(res.data);
       } catch (err) {

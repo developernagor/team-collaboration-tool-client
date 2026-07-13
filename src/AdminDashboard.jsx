@@ -100,7 +100,7 @@ useEffect(() => {
   axios
     .get("https://team-collaboration-tool-server.vercel.app/top-paying-students")
     .then((res) => {
-      console.log(res.data); // <-- Check this
+      // console.log(res.data); // <-- Check this
       setTopStudents(res.data);
     })
     .catch(console.error);

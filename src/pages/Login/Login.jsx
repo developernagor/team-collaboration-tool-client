@@ -23,7 +23,7 @@ function Login() {
     setLoading(true);
     try {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    console.log(result.user);
+    // console.log(result.user);
     form.reset();
     navigate("/");
   } catch (error) {

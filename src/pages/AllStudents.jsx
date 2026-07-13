@@ -21,7 +21,7 @@ function AllStudents() {
       console.log(error);
     }
   };
-  console.log(students)
+  // console.log(students)
 
   const activeStudents = students.filter(
   (student) => student.status === "active"

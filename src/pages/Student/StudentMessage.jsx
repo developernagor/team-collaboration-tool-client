@@ -248,10 +248,10 @@ useLayoutEffect(() => {
       const data =
         await res.json();
 
-      console.log(
-        "Seen Response:",
-        data
-      );
+      // console.log(
+      //   "Seen Response:",
+      //   data
+      // );
     } catch (err) {
       console.log(
         "Seen Error:",
@@ -550,7 +550,7 @@ Chat with your classmates.
       <button
   key={emoji}
   onClick={() => {
-    console.log("Clicked:", emoji, msg._id);
+    // console.log("Clicked:", emoji, msg._id);
     handleReaction(msg._id, emoji);
   }}
   className={`text-xl transition-all ${

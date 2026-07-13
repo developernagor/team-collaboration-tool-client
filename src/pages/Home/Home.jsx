@@ -1,10 +1,23 @@
 
-      import React from "react";
+      import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import Lottie from "lottie-react";
 import heroAnimation from "../../assets/hero.json";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase/firebase.config";
 
 export default function Home() {
+  const [user, setUser] = useState(null);
+
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    setUser(currentUser);
+  });
+
+  return () => unsubscribe();
+}, []);
+
+
   return (
 
     <>
@@ -47,23 +60,23 @@ export default function Home() {
 
             </p>
 
-            <div className="flex gap-4 mt-10">
+            {!user && (
+  <div className="flex gap-4 mt-10">
+    <Link
+      to="/register"
+      className="btn btn-primary btn-lg"
+    >
+      Get Started
+    </Link>
 
-              <Link
-                to="/register"
-                className="btn btn-primary btn-lg"
-              >
-                Get Started
-              </Link>
-
-              <Link
-                to="/login"
-                className="btn btn-outline btn-lg text-white"
-              >
-                Login
-              </Link>
-
-            </div>
+    <Link
+      to="/login"
+      className="btn btn-outline btn-lg text-white"
+    >
+      Login
+    </Link>
+  </div>
+)}
 
           </div>
 

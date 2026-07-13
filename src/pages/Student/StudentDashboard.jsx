@@ -20,7 +20,7 @@ useEffect(() => {
       `https://team-collaboration-tool-server.vercel.app/payments/student/${student._id}`
     )
     .then((res) => {
-      console.log("Payments API:", res.data);
+      // console.log("Payments API:", res.data);
       setPayments(res.data);
     });
 }, [student]);

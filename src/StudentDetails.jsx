@@ -73,9 +73,9 @@ const fetchPayments = async (studentId) => {
   );
 
   setPayments(res.data);
-  console.log(payments)
+  // console.log(payments)
 };
-console.log(payments)
+// console.log(payments)
 
   // const fetchPayments = async () => {
   //   const res = await axios.get(
