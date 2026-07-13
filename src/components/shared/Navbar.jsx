@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   onAuthStateChanged,
   signOut,
@@ -10,6 +10,7 @@ import { auth } from "../../firebase/firebase.config";
 function Navbar() {
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const navigate = useNavigate();
 
 const fetchUnreadCount = async () => {
   if (!user?.email) return;
@@ -52,52 +53,56 @@ useEffect(() => {
   const [dbUser, setDbUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (currentUser) => {
-        setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+  setUser(currentUser);
 
-        // ✅ Fetch role from database
-        if (currentUser?.email) {
-          try {
-            const res = await fetch(
-              `https://team-collaboration-tool-server.vercel.app/users/${currentUser.email}`
-            );
+  if (!currentUser) {
+    setDbUser(null);
+    return;
+  }
 
-            const data = await res.json();
-
-            setDbUser(data);
-
-          } catch (error) {
-            console.log(error);
-          }
-        }
-      }
+  try {
+    const res = await fetch(
+      `https://team-collaboration-tool-server.vercel.app/users/${currentUser.email}`
     );
 
-    return () => unsubscribe();
+    const data = await res.json();
+    setDbUser(data);
+  } catch (error) {
+    console.log(error);
+  }
+});
   }, []);
 
-  const handleLogout = async () => {
-    try {
+ const handleLogout = async () => {
+  try {
+    if (user?.email) {
       await fetch(
-    "https://team-collaboration-tool-server.vercel.app/users/session/end",
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
-      body: JSON.stringify({
-        email: user.email,
-      }),
+        "https://team-collaboration-tool-server.vercel.app/users/session/end",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: user.email,
+          }),
+        }
+      );
     }
-  );
-      await signOut(auth);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
+
+    await signOut(auth);
+
+    // Clear local state immediately
+    setUser(null);
+    setDbUser(null);
+
+    // Redirect to login page
+    navigate("/login", { replace: true });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
   let roleMenu;
 

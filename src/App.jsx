@@ -29,6 +29,7 @@ import Marksheet from "./pages/Marksheet";
 import StudentResult from "./Exam/StudentResult";
 import SearchResult from "./Exam/SearchResult";
 import UserManagement from "./Admin/UserManagement";
+import AdminRoute from "./Admin/AdminRoute";
 
 
 function App() {
@@ -54,6 +55,8 @@ function App() {
             }
           />
 
+          {/* Student Routes */}
+
           <Route
             path="/student-dashboard"
             element={
@@ -75,9 +78,9 @@ function App() {
           <Route
             path="/student-messages"
             element={
-              <PrivateRoute>
+              <StudentRoute>
                 <StudentMessage />
-              </PrivateRoute>
+              </StudentRoute>
             }
           />
 
@@ -133,34 +136,34 @@ function App() {
 <Route
             path="/add-student"
             element={
-              <AddStudent />
+              <AdminRoute><AddStudent /></AdminRoute>
             }
           />
           <Route
             path="/all-students"
             element={
-              <AllStudents />
+              <AdminRoute><AllStudents /></AdminRoute>
             }
           />
 
           <Route
             path="/student-attendance"
             element={
-              <AdminAttendance />
+              <AdminRoute><AdminAttendance /></AdminRoute>
             }
           />
 
           <Route
   path="/add-notice"
-  element={<AddNotice />}
+  element={<AdminRoute><AddNotice /></AdminRoute>}
 />
 
- <Route path="/add-exam" element={<AddExam />} />
-<Route path="/subject-management" element={<SubjectManagement />} />
-<Route path="/exam-routine" element={<ExamRoutine />} />
-<Route path="/add-result" element={<AddResult />} />
-<Route path="/result-list" element={<ResultList />} />
-<Route path="/dashboard/users" element={<UserManagement />} />
+ <Route path="/add-exam" element={<AdminRoute><AddExam /></AdminRoute>} />
+<Route path="/subject-management" element={<AdminRoute><SubjectManagement /></AdminRoute>} />
+<Route path="/exam-routine" element={<AdminRoute><ExamRoutine /></AdminRoute>} />
+<Route path="/add-result" element={<AdminRoute><AddResult /></AdminRoute>} />
+<Route path="/result-list" element={<AdminRoute><ResultList /></AdminRoute>} />
+<Route path="/dashboard/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
 
 <Route
   path="/marksheet/:studentId/:examId"
@@ -168,7 +171,10 @@ function App() {
 />
 <Route
   path="/student-result"
-  element={<StudentResult />}
+  element={
+  <AdminRoute>
+  <StudentResult />
+  </AdminRoute>}
 />
 {/* <Route path="/student-result" element={<StudentResult />} /> */}
 
@@ -176,7 +182,9 @@ function App() {
           <Route
             path="/admin-dashboard"
             element={
+              <AdminRoute>
               <AdminDashboard />
+              </AdminRoute>
             }
           />
 
@@ -184,13 +192,19 @@ function App() {
           <Route
             path="/student/:id"
             element={
+              <AdminRoute>
               <StudentDetails />
+              </AdminRoute>
             }
           />
 
           <Route
   path="/edit-student/:id"
-  element={<EditStudent />}
+  element={
+    <AdminRoute>
+  <EditStudent />
+  </AdminRoute>
+  }
 />
 
           {/* PUBLIC ROUTES */}

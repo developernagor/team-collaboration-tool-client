@@ -1,14 +1,13 @@
-import { Navigate, useLocation } from "react-router";
-import { onAuthStateChanged } from "firebase/auth";
+import { Navigate } from "react-router";
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
 import { auth } from "../firebase/firebase.config";
 
-function PrivateRoute({ children }) {
+
+function AdminRoute({ children }) {
   const [loading, setLoading] = useState(true);
   const [allowed, setAllowed] = useState(false);
-
-  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -22,9 +21,8 @@ function PrivateRoute({ children }) {
           `https://team-collaboration-tool-server.vercel.app/users/${currentUser.email}`
         );
 
-        setAllowed(res.data.role === "bondhu");
-      } catch (error) {
-        console.error(error);
+        setAllowed(res.data.role === "admin");
+      } catch {
         setAllowed(false);
       }
 
@@ -36,23 +34,13 @@ function PrivateRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="h-screen flex justify-center items-center">
+      <div className="flex justify-center mt-20">
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
   }
 
-  if (!allowed) {
-    return (
-      <Navigate
-        to="/login"
-        state={{ from: location }}
-        replace
-      />
-    );
-  }
-
-  return children;
+  return allowed ? children : <Navigate to="/" replace />;
 }
 
-export default PrivateRoute;
+export default AdminRoute;
