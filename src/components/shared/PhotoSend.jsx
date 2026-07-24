@@ -1,18 +1,30 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+// import Lightbox from "yet-another-react-lightbox";
+// import "yet-another-react-lightbox/styles.css";
+// import Zoom from "yet-another-react-lightbox/plugins/zoom";
+// import Download from "yet-another-react-lightbox/plugins/download";
 
 
 import { auth } from "../../firebase/firebase.config";
 import { onAuthStateChanged } from "firebase/auth";
 import PasswordGate from "../PasswordGate";
+import Gallery from "../Gallery/Gallery";
 
 function PhotoSend() {
   const [user, setUser] = useState(null);
   const [image, setImage] = useState(null);
+  // const [file, setFile] = useState(null);
   const [caption, setCaption] = useState("");
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  // const [lightboxIndex, setLightboxIndex] = useState(-1);
+ const [selectedYear, setSelectedYear] = useState("");
+const [selectedMonth, setSelectedMonth] = useState("");
+
+  // const isVideo =
+  //   file?.type.startsWith("video");
 
   // Replace with your ImgBB API key
 const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
@@ -137,22 +149,107 @@ console.log(
     }
   };
 
+const filteredPhotos = photos.filter((photo) => {
+  const date = new Date(photo.createdAt);
+
+  const yearMatch =
+    !selectedYear ||
+    date.getFullYear().toString() === selectedYear;
+
+  const monthMatch =
+    !selectedMonth ||
+    (date.getMonth() + 1).toString() === selectedMonth;
+
+  return yearMatch && monthMatch;
+});
+
+// const slides = filteredPhotos.map((photo) => ({
+//   src: photo.image,
+// }));
+
+const years = [
+  ...new Set(
+    photos.map((photo) =>
+      new Date(photo.createdAt).getFullYear()
+    )
+  ),
+].sort((a, b) => b - a);
+
   return (
     <PasswordGate>
     <div className="min-h-screen bg-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
 
-        {/* HEADER */}
-        <div className="bg-white rounded-xl shadow-md p-5 mb-6">
-          <h1 className="text-3xl font-bold text-center">
-            📷 PhotoSend
-          </h1>
+       {/* Modern Header */}
+<div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-8 mb-8 shadow-2xl">
 
-          <p className="text-center text-gray-500 mt-2">
-            Share photos with
-            everyone
-          </p>
-        </div>
+  {/* Background Decorations */}
+  <div className="absolute -top-12 -right-12 h-44 w-44 rounded-full bg-white/10 blur-3xl"></div>
+  <div className="absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-white/10 blur-3xl"></div>
+
+  <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
+
+    {/* Left */}
+    <div>
+
+      <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur">
+        <span className="text-2xl">📸</span>
+        <span className="text-white font-semibold">
+          Smart Gallery
+        </span>
+      </div>
+
+      <h1 className="mt-5 text-5xl font-extrabold text-white">
+        PhotoSend
+      </h1>
+
+      <p className="mt-4 max-w-xl text-white/90 text-lg">
+        Upload, organize, and share your memories with a beautiful
+        modern gallery experience.
+      </p>
+
+      <div className="mt-6 flex flex-wrap gap-3">
+
+        <span className="rounded-full bg-white/20 px-4 py-2 text-white backdrop-blur">
+          📷 {photos.length} Photos
+        </span>
+
+        <span className="rounded-full bg-white/20 px-4 py-2 text-white backdrop-blur">
+          👤 {
+            [...new Set(photos.map(photo => photo.userEmail))].length
+          } Users
+        </span>
+
+      </div>
+
+    </div>
+
+    {/* Right */}
+    <div className="grid grid-cols-2 gap-4">
+
+      <div className="rounded-2xl bg-white/20 backdrop-blur-lg p-5 text-center">
+        <p className="text-4xl font-bold text-white">
+          {photos.length}
+        </p>
+        <p className="text-white/80">
+          Total Photos
+        </p>
+      </div>
+
+      <div className="rounded-2xl bg-white/20 backdrop-blur-lg p-5 text-center">
+        <p className="text-4xl font-bold text-white">
+          {years.length}
+        </p>
+        <p className="text-white/80">
+          Years
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
         {/* UPLOAD FORM */}
         <form
@@ -173,7 +270,7 @@ console.log(
 
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
             onChange={(e) =>
               setImage(
                 e.target.files[0]
@@ -181,6 +278,8 @@ console.log(
             }
             className="mb-4"
           />
+
+          
 
           {image && (
             <div className="mb-4">
@@ -194,6 +293,7 @@ console.log(
             </div>
           )}
 
+
           <button
             type="submit"
             disabled={loading}
@@ -205,8 +305,57 @@ console.log(
           </button>
         </form>
 
-                {/* PHOTOS FEED */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl shadow p-4 mb-6">
+  <label className="font-semibold mr-3">
+    Filter by Month and Year
+  </label>
+
+<select
+  value={selectedYear}
+  onChange={(e) => setSelectedYear(e.target.value)}
+  className="border rounded-lg px-3 py-2"
+>
+  <option value="">All Years</option>
+  {years.map((year) => (
+    <option key={year} value={year}>
+      {year}
+    </option>
+  ))}
+</select>
+
+<select
+  value={selectedMonth}
+  onChange={(e) => setSelectedMonth(e.target.value)}
+  className="border rounded-lg px-3 py-2 ml-3"
+>
+  <option value="">All Months</option>
+  <option value="1">January</option>
+  <option value="2">February</option>
+  <option value="3">March</option>
+  <option value="4">April</option>
+  <option value="5">May</option>
+  <option value="6">June</option>
+  <option value="7">July</option>
+  <option value="8">August</option>
+  <option value="9">September</option>
+  <option value="10">October</option>
+  <option value="11">November</option>
+  <option value="12">December</option>
+</select>
+
+  <button
+    onClick={() => {
+  setSelectedYear("");
+  setSelectedMonth("");
+}}
+    className="ml-3 px-4 py-2 rounded-lg bg-gray-200"
+  >
+    Clear
+  </button>
+</div>
+
+                {/* PHOTOS FEED  */}
+         {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {photos.length === 0 ? (
             <div className="col-span-full bg-white rounded-2xl p-10 text-center shadow">
               <p className="text-gray-500 text-lg">
@@ -214,7 +363,7 @@ console.log(
               </p>
             </div>
           ) : (
-            photos.map((photo) => (
+            filteredPhotos.map((photo) => (
               <div
                 key={photo._id}
                 className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
@@ -269,7 +418,53 @@ console.log(
               </div>
             ))
           )}
-        </div>
+        </div> */}
+
+<div className="flex justify-between items-center mb-6">
+
+    <h2 className="text-2xl font-bold">
+        Gallery
+    </h2>
+
+    <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold">
+        {filteredPhotos.length} Photos
+    </span>
+
+</div>
+<Gallery
+  photos={filteredPhotos}
+  onImageClick={setSelectedImage}
+  
+/>
+
+{selectedImage && (
+  <div
+    className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+    onClick={() => setSelectedImage(null)}
+  >
+    <button
+      className="absolute top-5 right-6 text-white text-4xl"
+      onClick={() => setSelectedImage(null)}
+    >
+      ×
+    </button>
+
+    <img
+      src={selectedImage}
+      alt="Preview"
+      onClick={(e) => e.stopPropagation()}
+      className="max-w-[95vw] max-h-[95vh] rounded-xl shadow-2xl"
+    />
+  </div>
+)}
+
+{/* <Lightbox
+  open={lightboxIndex >= 0}
+  close={() => setLightboxIndex(-1)}
+  index={lightboxIndex}
+  slides={slides}
+  plugins={[Zoom, Download]}
+/> */}
 
       </div>
     </div>
