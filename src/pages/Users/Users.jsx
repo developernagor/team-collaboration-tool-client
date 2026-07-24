@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PasswordGate from "../../components/PasswordGate";
 
 function Users({ currentUser }) {
   const [users, setUsers] = useState([]);
@@ -45,6 +46,7 @@ function Users({ currentUser }) {
   };
 
   return (
+    <PasswordGate>
     <div className="w-64 bg-white border-r h-full overflow-y-auto">
       <h2 className="p-3 font-bold border-b">Users</h2>
 
@@ -58,6 +60,7 @@ const isOnline =
   lastSeenTime && Date.now() - lastSeenTime < 60000;
 
         return (
+          
           <div key={user._id} className="p-3 border-b hover:bg-gray-100">
             <p className="font-medium">
               {user.name} {isMe && "(You)"}
@@ -76,12 +79,15 @@ const isOnline =
               )}
             </p>
           </div>
+          
         );
       })
       
       }
     </div>
+    </PasswordGate>
   );
+  
 }
 
 export default Users;
