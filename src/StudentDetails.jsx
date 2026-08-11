@@ -36,6 +36,26 @@ export default function StudentDetails() {
     note: "",
   });
 
+  const [attendance, setAttendance] = useState([]);
+const [attendanceLoading, setAttendanceLoading] = useState(false);
+
+  const fetchAttendance = async (studentId) => {
+  try {
+    setAttendanceLoading(true);
+
+    const res = await axios.get(
+      `https://team-collaboration-tool-server.vercel.app/attendance/student/${studentId}`
+    );
+
+    setAttendance(res.data);
+  } catch (error) {
+    console.error("Failed to fetch attendance:", error);
+    setAttendance([]);
+  } finally {
+    setAttendanceLoading(false);
+  }
+};
+
   const monthlyChartData = payments
   .sort((a, b) => new Date(a.paidDate) - new Date(b.paidDate))
   .map((payment) => ({
@@ -43,6 +63,64 @@ export default function StudentDetails() {
     amount: Number(payment.amount),
   }));
 
+  useEffect(() => {
+  if (student?._id) {
+    fetchPayments(student._id);
+    fetchAttendance(student._id);
+  }
+}, [student]);
+
+const getMonthlyAttendance = () => {
+  const monthly = {};
+
+  attendance.forEach((record) => {
+    const date = new Date(
+      record.date || record.attendanceDate || record.createdAt
+    );
+
+    if (isNaN(date.getTime())) return;
+
+    const monthKey = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}`;
+
+    const monthName = date.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
+
+    if (!monthly[monthKey]) {
+      monthly[monthKey] = {
+        monthKey,
+        monthName,
+        present: 0,
+        absent: 0,
+        late: 0,
+        total: 0,
+      };
+    }
+
+    const status = String(record.status || "").toLowerCase();
+
+    monthly[monthKey].total++;
+
+    if (status === "present") {
+      monthly[monthKey].present++;
+    } else if (status === "absent") {
+      monthly[monthKey].absent++;
+    } else if (status === "late") {
+      monthly[monthKey].late++;
+    }
+  });
+
+  return Object.values(monthly).sort(
+    (a, b) =>
+      new Date(b.monthKey + "-01") -
+      new Date(a.monthKey + "-01")
+  );
+};
+
+const monthlyAttendance = getMonthlyAttendance();
 
 
   const fetchStudent = async () => {
@@ -654,6 +732,142 @@ const dueInfo = calculateDue();
       {" "}৳ {dueInfo.due.toLocaleString()}
     </span>
   </p>
+</div>
+
+
+{/* ================= MONTHLY ATTENDANCE ================= */}
+
+<div className="mt-8">
+  <div className="flex items-center justify-between mb-5">
+    <div>
+      <h2 className="text-2xl font-bold">
+        📅 Monthly Attendance
+      </h2>
+
+      <p className="text-gray-500 text-sm mt-1">
+        Monthly attendance summary for {student.studentName}
+      </p>
+    </div>
+  </div>
+
+  {attendanceLoading ? (
+    <div className="bg-base-100 shadow-xl rounded-2xl p-8 text-center">
+      <span className="loading loading-spinner loading-lg"></span>
+      <p className="mt-3 text-gray-500">
+        Loading attendance...
+      </p>
+    </div>
+  ) : monthlyAttendance.length === 0 ? (
+    <div className="bg-base-100 shadow-xl rounded-2xl p-8 text-center">
+      <div className="text-5xl mb-3">📅</div>
+
+      <h3 className="text-xl font-bold">
+        No Attendance Records
+      </h3>
+
+      <p className="text-gray-500 mt-2">
+        Attendance records for this student are not available.
+      </p>
+    </div>
+  ) : (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {monthlyAttendance.map((month) => (
+        <div
+          key={month.monthKey}
+          className="bg-base-100 rounded-2xl shadow-xl overflow-hidden"
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-5">
+            <h3 className="text-xl font-bold">
+              {month.monthName}
+            </h3>
+
+            <p className="text-sm opacity-80 mt-1">
+              Total Records: {month.total}
+            </p>
+          </div>
+
+          {/* Attendance counts */}
+          <div className="p-5">
+            <div className="grid grid-cols-3 gap-3">
+
+              {/* Present */}
+              <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
+                <div className="text-2xl">
+                  ✅
+                </div>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Present
+                </p>
+
+                <p className="text-2xl font-bold text-green-600">
+                  {month.present}
+                </p>
+              </div>
+
+              {/* Absent */}
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+                <div className="text-2xl">
+                  ❌
+                </div>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Absent
+                </p>
+
+                <p className="text-2xl font-bold text-red-600">
+                  {month.absent}
+                </p>
+              </div>
+
+              {/* Late */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-center">
+                <div className="text-2xl">
+                  🕐
+                </div>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Late
+                </p>
+
+                <p className="text-2xl font-bold text-yellow-600">
+                  {month.late}
+                </p>
+              </div>
+
+            </div>
+
+            {/* Description */}
+            <div className="mt-5 border-t pt-4">
+              <h4 className="font-semibold text-gray-700 mb-2">
+                Attendance Description
+              </h4>
+
+              {month.absent === 0 && month.late === 0 ? (
+                <p className="text-green-600 font-medium">
+                  🌟 Excellent attendance. No absence or late record.
+                </p>
+              ) : month.absent > month.present ? (
+                <p className="text-red-600 font-medium">
+                  ⚠️ Attendance needs improvement.
+                </p>
+              ) : month.late > 0 ? (
+                <p className="text-yellow-600 font-medium">
+                  🕐 Student was late {month.late} time
+                  {month.late > 1 ? "s" : ""} this month.
+                </p>
+              ) : (
+                <p className="text-blue-600 font-medium">
+                  👍 Attendance is generally good.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
 </div>
 
       

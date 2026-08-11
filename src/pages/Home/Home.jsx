@@ -524,7 +524,7 @@ useEffect(() => {
 
         <div className="card-body text-center">
           <h3 className="text-xl font-bold">
-            Md. Rahim
+          Suleman Musa Chisty
           </h3>
 
           <p className="text-primary font-semibold">
@@ -548,7 +548,7 @@ useEffect(() => {
 
         <div className="card-body text-center">
           <h3 className="text-xl font-bold">
-            Nusrat Jahan
+            Shirin Chowdhury
           </h3>
 
           <p className="text-secondary font-semibold">
@@ -572,7 +572,7 @@ useEffect(() => {
 
         <div className="card-body text-center">
           <h3 className="text-xl font-bold">
-            Ariful Islam
+            Talibul Islam
           </h3>
 
           <p className="text-accent font-semibold">
@@ -596,7 +596,7 @@ useEffect(() => {
 
         <div className="card-body text-center">
           <h3 className="text-xl font-bold">
-            Fatema Akter
+            Bahar
           </h3>
 
           <p className="text-info font-semibold">
@@ -648,11 +648,11 @@ useEffect(() => {
           <div className="mt-4">
 
             <h4 className="font-bold">
-              Arafat Hossain
+              Flora
             </h4>
 
             <span className="text-sm opacity-70">
-              Class 10 Student
+              Class 8 Student
             </span>
 
           </div>

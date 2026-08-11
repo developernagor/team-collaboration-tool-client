@@ -109,55 +109,65 @@ setTodayAttendance(attendanceRes.data);
         </thead>
 
         <tbody>
-          {students.map((student) => (
-            <tr key={student._id}>
-              <td>{student.studentName}</td>
-              <td>{student.email}</td>
+  {students
+    .filter((student) => student.status === "active")
+    .map((student) => (
+      <tr key={student._id}>
+        <td>{student.studentName}</td>
+        <td>{student.email}</td>
 
-    <td>
-  {isFriday ? (
-    <span className="badge badge-neutral">
-      Weekend
-    </span>
-  ) : getAttendance(student._id) ? (
-    <span className="badge badge-success">
-      {getAttendance(student._id).status}
-    </span>
-  ) : (
-    <div className="space-x-2">
-      <button
-        className="btn btn-success btn-sm"
-        onClick={() => markAttendance(student, "Present")}
-      >
-        Present
-      </button>
+        <td>
+          {isFriday ? (
+            <span className="badge badge-neutral">Weekend</span>
+          ) : getAttendance(student._id) ? (
+            <span
+              className={`badge ${
+                getAttendance(student._id).status === "Present"
+                  ? "badge-success"
+                  : getAttendance(student._id).status === "Absent"
+                  ? "badge-error"
+                  : getAttendance(student._id).status === "Late"
+                  ? "badge-warning"
+                  : "badge-info"
+              }`}
+            >
+              {getAttendance(student._id).status}
+            </span>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                className="btn btn-success btn-sm"
+                onClick={() => markAttendance(student, "Present")}
+              >
+                Present
+              </button>
 
-      <button
-        className="btn btn-error btn-sm"
-        onClick={() => markAttendance(student, "Absent")}
-      >
-        Absent
-      </button>
+              <button
+                className="btn btn-error btn-sm"
+                onClick={() => markAttendance(student, "Absent")}
+              >
+                Absent
+              </button>
 
-      <button
-        className="btn btn-warning btn-sm"
-        onClick={() => markAttendance(student, "Late")}
-      >
-        Late
-      </button>
+              <button
+                className="btn btn-warning btn-sm"
+                onClick={() => markAttendance(student, "Late")}
+              >
+                Late
+              </button>
 
-      <button
-        className="btn btn-info btn-sm"
-        onClick={() => markAttendance(student, "Leave")}
-      >
-        Leave
-      </button>
-    </div>
-  )}
-</td>
-            </tr>
-          ))}
-        </tbody>
+              <button
+                className="btn btn-info btn-sm"
+                onClick={() => markAttendance(student, "Leave")}
+              >
+                Leave
+              </button>
+            </div>
+          )}
+        </td>
+      </tr>
+    ))}
+</tbody>
       </table>
     </div>
   );
