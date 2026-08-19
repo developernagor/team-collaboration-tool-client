@@ -123,6 +123,7 @@ if (dbUser?.role === "bondhu") {
 </Link>
       <Link to="/photosend">📷 PhotoSend</Link>
       <Link to="/users">Active Status</Link>
+      <Link to="/add-memory">Add Memory</Link>
       <Link to="/dashboard">Dashboard</Link>
     </>
   );

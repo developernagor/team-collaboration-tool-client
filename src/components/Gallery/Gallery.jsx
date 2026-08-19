@@ -1,10 +1,7 @@
 import Masonry from "react-masonry-css";
 import PhotoCard from "./PhotoCard";
 
-export default function Gallery({
-  photos,
-  onImageClick,
-}) {
+export default function Gallery({ photos, onImageClick }) {
   const breakpointColumnsObj = {
     default: 4,
     1280: 3,
@@ -12,11 +9,21 @@ export default function Gallery({
     500: 1,
   };
 
+  if (!photos || photos.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl p-10 text-center shadow">
+        <p className="text-gray-500 text-lg">
+          No photos found 📷
+        </p>
+      </div>
+    );
+  }
+
   return (
     <Masonry
       breakpointCols={breakpointColumnsObj}
-      className="flex gap-5"
-      columnClassName="space-y-5"
+      className="flex w-full gap-5"
+      columnClassName="flex flex-col gap-5"
     >
       {photos.map((photo) => (
         <PhotoCard

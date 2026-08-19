@@ -23,6 +23,10 @@ function PhotoSend() {
  const [selectedYear, setSelectedYear] = useState("");
 const [selectedMonth, setSelectedMonth] = useState("");
 
+const [currentPage, setCurrentPage] = useState(1);
+
+const photosPerPage = 10;
+
   // const isVideo =
   //   file?.type.startsWith("video");
 
@@ -48,22 +52,27 @@ const imgbbKey = import.meta.env.VITE_IMGBB_KEY;
   // FETCH PHOTOS
   // =========================
   const fetchPhotos = async () => {
-    try {
-      const res = await fetch(
-        "https://team-collaboration-tool-server.vercel.app/photos"
-      );
+  try {
+    const res = await fetch(
+      "https://team-collaboration-tool-server.vercel.app/photos"
+    );
 
-      const data = await res.json();
-
-      setPhotos(
-        Array.isArray(data)
-          ? data.reverse()
-          : []
-      );
-    } catch (error) {
-      // console.log(error);
+    if (!res.ok) {
+      throw new Error("Failed to fetch photos");
     }
-  };
+
+    const data = await res.json();
+
+    setPhotos(
+      Array.isArray(data)
+        ? [...data].reverse()
+        : []
+    );
+  } catch (error) {
+    console.error("Fetch Photos Error:", error);
+    setPhotos([]);
+  }
+};
 
   useEffect(() => {
     fetchPhotos();
@@ -162,6 +171,23 @@ const filteredPhotos = photos.filter((photo) => {
 
   return yearMatch && monthMatch;
 });
+
+const totalPages = Math.ceil(
+  filteredPhotos.length / photosPerPage
+);
+
+const startIndex =
+  (currentPage - 1) * photosPerPage;
+
+const endIndex =
+  startIndex + photosPerPage;
+
+const paginatedPhotos =
+  filteredPhotos.slice(startIndex, endIndex);
+
+  useEffect(() => {
+  setCurrentPage(1);
+}, [selectedYear, selectedMonth]);
 
 // const slides = filteredPhotos.map((photo) => ({
 //   src: photo.image,
@@ -269,15 +295,17 @@ const years = [
           />
 
           <input
-            type="file"
-            accept="image/*,video/*"
-            onChange={(e) =>
-              setImage(
-                e.target.files[0]
-              )
-            }
-            className="mb-4"
-          />
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const selectedFile = e.target.files?.[0];
+
+    if (selectedFile) {
+      setImage(selectedFile);
+    }
+  }}
+  className="mb-4"
+/>
 
           
 
@@ -422,20 +450,76 @@ const years = [
 
 <div className="flex justify-between items-center mb-6">
 
-    <h2 className="text-2xl font-bold">
-        Gallery
-    </h2>
+  <h2 className="text-2xl font-bold">
+    Gallery
+  </h2>
 
-    <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold">
-        {filteredPhotos.length} Photos
-    </span>
+  <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold">
+    {filteredPhotos.length} Photos
+  </span>
 
 </div>
 <Gallery
-  photos={filteredPhotos}
+  photos={paginatedPhotos}
   onImageClick={setSelectedImage}
-  
 />
+{/* PAGINATION */}
+
+{totalPages > 1 && (
+  <div className="flex flex-wrap justify-center items-center gap-2 mt-8">
+
+    {/* Previous */}
+    <button
+      onClick={() =>
+        setCurrentPage((prev) => Math.max(prev - 1, 1))
+      }
+      disabled={currentPage === 1}
+      className={`px-4 py-2 rounded-lg font-medium transition ${
+        currentPage === 1
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-blue-500 text-white hover:bg-blue-600"
+      }`}
+    >
+      ← Previous
+    </button>
+
+    {/* Page Numbers */}
+    {Array.from(
+      { length: totalPages },
+      (_, index) => index + 1
+    ).map((page) => (
+      <button
+        key={page}
+        onClick={() => setCurrentPage(page)}
+        className={`w-10 h-10 rounded-lg font-semibold transition ${
+          currentPage === page
+            ? "bg-blue-600 text-white shadow-lg"
+            : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+        }`}
+      >
+        {page}
+      </button>
+    ))}
+
+    {/* Next */}
+    <button
+      onClick={() =>
+        setCurrentPage((prev) =>
+          Math.min(prev + 1, totalPages)
+        )
+      }
+      disabled={currentPage === totalPages}
+      className={`px-4 py-2 rounded-lg font-medium transition ${
+        currentPage === totalPages
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-blue-500 text-white hover:bg-blue-600"
+      }`}
+    >
+      Next →
+    </button>
+
+  </div>
+)}
 
 {selectedImage && (
   <div

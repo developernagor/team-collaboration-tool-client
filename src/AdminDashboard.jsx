@@ -342,6 +342,18 @@ if (loading) {
     Payment Due Students
   </h2>
 
+  <div className="bg-red-100 text-red-700 px-5 py-3 rounded-xl font-bold">
+    Total Due: ৳{" "}
+    {dueStudents
+      .reduce(
+        (total, student) =>
+          total + Number(student.monthlySalary || 0),
+        0
+      )
+      .toLocaleString()}
+  </div>
+</div>
+
   <div className="overflow-x-auto bg-white rounded-xl shadow">
     <table className="table">
       <thead>
@@ -352,6 +364,7 @@ if (loading) {
           <th>Phone</th>
           <th>Due Date</th>
           <th>Monthly Fee</th>
+          <th>Total Due Amount</th>
         </tr>
       </thead>
 
@@ -364,14 +377,18 @@ if (loading) {
             <td>{student.guardianPhone}</td>
             <td>{student.salaryDate}</td>
             <td className="text-red-600 font-bold">
-              ৳ {student.monthlySalary}
-            </td>
+  ৳ {Number(student.monthlySalary || 0).toLocaleString()}
+</td>
+
+<td className="text-red-700 font-bold">
+  ৳ {Number(student.totalDueAmount || 0).toLocaleString()}
+</td>
           </tr>
         ))}
       </tbody>
     </table>
   </div>
-</div>
+
 
 {/* Upcoming Payments */}
 <div className="card bg-base-100 shadow-xl mt-8">

@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import PasswordGate from "./PasswordGate";
+import AddMemory from "./AddMemory";
 
 
 function Dashboard() {
@@ -19,6 +20,30 @@ function Dashboard() {
 
   const [favoriteMessages, setFavoriteMessages] =
   useState([]);
+
+  const [specialMemories, setSpecialMemories] = useState([]);
+
+useEffect(() => {
+  const fetchMemories = async () => {
+    try {
+      const res = await fetch(
+        "https://team-collaboration-tool-server.vercel.app/memories"
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch memories");
+      }
+
+      const data = await res.json();
+
+      setSpecialMemories(data);
+    } catch (err) {
+      console.error("Failed to load special memories:", err);
+    }
+  };
+
+  fetchMemories();
+}, []);
 
 const [page, setPage] =
   useState(1);
@@ -342,6 +367,151 @@ const formatTime = (seconds) => {
       )
     )}
   </div>
+</div>
+
+{/* ADD MEMORY */}
+<div className="mt-6">
+  <AddMemory
+    user={user}
+    onMemoryAdded={(newMemory) => {
+      setSpecialMemories((prev) => [
+        newMemory,
+        ...prev,
+      ]);
+    }}
+  />
+</div>
+
+{/* ================= SPECIAL MEMORIES ================= */}
+<div className="bg-white rounded-2xl shadow p-6 mt-6">
+
+  <div className="flex items-center justify-between mb-6">
+
+    <div>
+      <h2 className="text-2xl font-bold">
+        💖 Special Memories
+      </h2>
+
+      <p className="text-gray-500 text-sm mt-1">
+        Some moments worth remembering forever
+      </p>
+    </div>
+
+    <div className="text-3xl">
+      ✨
+    </div>
+
+  </div>
+
+  {specialMemories.length === 0 ? (
+
+    <div className="text-center py-12">
+
+      <div className="text-6xl mb-4">
+        🌸
+      </div>
+
+      <h3 className="text-xl font-semibold text-gray-700">
+        No special memories yet
+      </h3>
+
+      <p className="text-gray-400 mt-2">
+        Your beautiful memories will appear here.
+      </p>
+
+    </div>
+
+  ) : (
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      {specialMemories.map((memory) => (
+
+        <div
+          key={memory._id}
+          className="group bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300"
+        >
+
+          {/* IMAGE */}
+          {memory.image ? (
+
+            <div className="overflow-hidden">
+
+              <img
+                src={memory.image}
+                alt={memory.title || "Special Memory"}
+                className="w-full h-56 object-cover group-hover:scale-110 transition duration-500"
+              />
+
+            </div>
+
+          ) : (
+
+            <div className="w-full h-56 bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center">
+
+              <span className="text-7xl">
+                💝
+              </span>
+
+            </div>
+
+          )}
+
+          {/* CONTENT */}
+          <div className="p-5">
+
+            <div className="flex justify-between items-start gap-3">
+
+              <h3 className="text-xl font-bold text-gray-800">
+                {memory.title}
+              </h3>
+
+              <span className="text-2xl">
+                ❤️
+              </span>
+
+            </div>
+
+            {memory.description && (
+              <p className="text-gray-600 mt-3 leading-relaxed">
+                {memory.description}
+              </p>
+            )}
+
+            {/* MEMORY DATE */}
+            {memory.memoryDate && (
+              <p className="text-sm text-purple-600 font-semibold mt-4">
+                📅{" "}
+                {new Date(
+                  memory.memoryDate
+                ).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </p>
+            )}
+
+            {/* CREATED DATE */}
+            {memory.createdAt && (
+              <p className="text-xs text-gray-400 mt-2">
+                Added{" "}
+                {new Date(
+                  memory.createdAt
+                ).toLocaleDateString("en-GB")}
+              </p>
+            )}
+
+          </div>
+
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
+
 </div>
 
 {/* Recent Messages */}

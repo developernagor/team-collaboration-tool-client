@@ -30,6 +30,7 @@ import StudentResult from "./Exam/StudentResult";
 import SearchResult from "./Exam/SearchResult";
 import UserManagement from "./Admin/UserManagement";
 import AdminRoute from "./Admin/AdminRoute";
+import AddMemory from "./components/AddMemory";
 
 
 function App() {
@@ -129,6 +130,14 @@ function App() {
             element={
               <PrivateRoute>
                 <PhotoSend />
+              </PrivateRoute>
+            }
+          /> 
+          <Route
+            path="/add-memory"
+            element={
+              <PrivateRoute>
+                <AddMemory />
               </PrivateRoute>
             }
           />
