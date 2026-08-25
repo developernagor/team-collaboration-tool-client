@@ -121,9 +121,9 @@ if (dbUser?.role === "bondhu") {
     </span>
   )}
 </Link>
-      <Link to="/photosend">📷 PhotoSend</Link>
+      <Link to="/photosend">📷 Gallery</Link>
       <Link to="/users">Active Status</Link>
-      <Link to="/add-memory">Add Memory</Link>
+      <Link to="/add-memory">Memories</Link>
       <Link to="/dashboard">Dashboard</Link>
     </>
   );
