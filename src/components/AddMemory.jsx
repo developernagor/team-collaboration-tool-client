@@ -7,12 +7,40 @@ export default function AddMemory({ onMemoryAdded }) {
   const [user, setUser] = useState(null);
 
   const [specialMemories, setSpecialMemories] = useState([]);
-
-  const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({
     title: "",
     description: "",
     memoryDate: "",
   });
+
+
+const [specialDates, setSpecialDates] = useState([]);
+
+const [specialDateForm, setSpecialDateForm] = useState({
+  title: "",
+  date: "",
+  type: "Other",
+  description: "",
+});
+
+const fetchSpecialDates = async () => {
+  try {
+    const res = await axios.get(
+      "https://team-collaboration-tool-server.vercel.app/special-dates"
+    );
+
+    setSpecialDates(res.data || []);
+  } catch (error) {
+    console.error("Failed to load special dates:", error);
+  }
+};
+
+useEffect(() => {
+  fetchMemories();
+  fetchSpecialDates();
+}, []);
+
+
 
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -199,6 +227,57 @@ export default function AddMemory({ onMemoryAdded }) {
       setLoading(false);
     }
   };
+
+  const handleSpecialDateSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!user?.email) {
+    alert("Please login again.");
+    return;
+  }
+
+  try {
+    const specialDate = {
+      userEmail: user.email,
+      title: specialDateForm.title.trim(),
+      date: specialDateForm.date,
+      type: specialDateForm.type,
+      description: specialDateForm.description.trim(),
+    };
+
+    const res = await axios.post(
+      "https://team-collaboration-tool-server.vercel.app/special-dates",
+      specialDate
+    );
+
+    if (res.data.success) {
+      setSpecialDates((prev) => [
+        {
+          ...specialDate,
+          _id: res.data.insertedId,
+        },
+        ...prev,
+      ]);
+
+      setSpecialDateForm({
+        title: "",
+        date: "",
+        type: "Other",
+        description: "",
+      });
+
+      alert("Special date added successfully 📅❤️");
+    }
+
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to add special date"
+    );
+  }
+};
 
   // =========================
   // LOADING
@@ -484,6 +563,224 @@ export default function AddMemory({ onMemoryAdded }) {
         )}
 
       </div>
+
+      {/* Special Date Section */}
+      <div className="bg-white rounded-2xl shadow p-6">
+
+  <div className="flex items-center gap-3 mb-5">
+    <div className="text-4xl">📅</div>
+
+    <div>
+      <h2 className="text-2xl font-bold">
+        Add Special Date
+      </h2>
+
+      <p className="text-gray-500 text-sm">
+        Save an important date that you never want to forget.
+      </p>
+    </div>
+  </div>
+
+  <form
+    onSubmit={handleSpecialDateSubmit}
+    className="space-y-4"
+  >
+
+    <div>
+      <label className="font-semibold block mb-1">
+        Title
+      </label>
+
+      <input
+        type="text"
+        value={specialDateForm.title}
+        onChange={(e) =>
+          setSpecialDateForm((prev) => ({
+            ...prev,
+            title: e.target.value,
+          }))
+        }
+        placeholder="Example: My Birthday"
+        className="input input-bordered w-full"
+        required
+      />
+    </div>
+
+    <div>
+      <label className="font-semibold block mb-1">
+        Date
+      </label>
+
+      <input
+        type="date"
+        value={specialDateForm.date}
+        onChange={(e) =>
+          setSpecialDateForm((prev) => ({
+            ...prev,
+            date: e.target.value,
+          }))
+        }
+        className="input input-bordered w-full"
+        required
+      />
+    </div>
+
+    <div>
+      <label className="font-semibold block mb-1">
+        Type
+      </label>
+
+      <select
+        value={specialDateForm.type}
+        onChange={(e) =>
+          setSpecialDateForm((prev) => ({
+            ...prev,
+            type: e.target.value,
+          }))
+        }
+        className="select select-bordered w-full"
+      >
+        <option value="Birthday">🎂 Birthday</option>
+        <option value="Anniversary">❤️ Anniversary</option>
+        <option value="Event">🎉 Event</option>
+        <option value="Achievement">🏆 Achievement</option>
+        <option value="Other">📅 Other</option>
+      </select>
+    </div>
+
+    <div>
+      <label className="font-semibold block mb-1">
+        Description
+      </label>
+
+      <textarea
+        value={specialDateForm.description}
+        onChange={(e) =>
+          setSpecialDateForm((prev) => ({
+            ...prev,
+            description: e.target.value,
+          }))
+        }
+        placeholder="Why is this date special?"
+        className="textarea textarea-bordered w-full"
+        rows="3"
+      />
+    </div>
+
+    <button
+      type="submit"
+      className="btn btn-secondary w-full"
+    >
+      📅 Add Special Date
+    </button>
+
+  </form>
+</div>
+
+{/* =========================
+    SPECIAL DATES
+========================= */}
+<div className="bg-white rounded-2xl shadow p-6">
+
+  <div className="flex items-center justify-between mb-6">
+    <div>
+      <h2 className="text-2xl font-bold">
+        📅 Special Dates
+      </h2>
+
+      <p className="text-gray-500 text-sm mt-1">
+        Important dates you don't want to forget
+      </p>
+    </div>
+
+    <div className="text-3xl">
+      ✨
+    </div>
+  </div>
+
+  {specialDates.length === 0 ? (
+
+    <div className="text-center py-10">
+      <div className="text-5xl mb-3">
+        📅
+      </div>
+
+      <h3 className="text-lg font-semibold text-gray-700">
+        No special dates yet
+      </h3>
+
+      <p className="text-gray-400 mt-1">
+        Add an important date above.
+      </p>
+    </div>
+
+  ) : (
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      {specialDates.map((specialDate) => (
+
+        <div
+          key={specialDate._id}
+          className="rounded-2xl p-5 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 shadow-md hover:shadow-xl transition-all duration-300"
+        >
+
+          {/* ICON */}
+          <div className="flex items-center justify-between">
+
+            <div className="text-4xl">
+              {specialDate.type === "Birthday"
+                ? "🎂"
+                : specialDate.type === "Anniversary"
+                ? "❤️"
+                : specialDate.type === "Event"
+                ? "🎉"
+                : specialDate.type === "Achievement"
+                ? "🏆"
+                : "📅"}
+            </div>
+
+            <span className="badge badge-primary">
+              {specialDate.type}
+            </span>
+
+          </div>
+
+          {/* TITLE */}
+          <h3 className="text-xl font-bold text-gray-800 mt-4">
+            {specialDate.title}
+          </h3>
+
+          {/* DATE */}
+          {specialDate.date && (
+            <p className="text-purple-600 font-semibold mt-2">
+              📅{" "}
+              {new Date(
+                specialDate.date
+              ).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          )}
+
+          {/* DESCRIPTION */}
+          {specialDate.description && (
+            <p className="text-gray-600 mt-3">
+              {specialDate.description}
+            </p>
+          )}
+
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
 
     </div>
   );
