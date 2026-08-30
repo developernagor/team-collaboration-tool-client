@@ -343,15 +343,16 @@ if (loading) {
   </h2>
 
   <div className="bg-red-100 text-red-700 px-5 py-3 rounded-xl font-bold">
-    Total Due: ৳{" "}
-    {dueStudents
-      .reduce(
-        (total, student) =>
-          total + Number(student.monthlySalary || 0),
-        0
-      )
-      .toLocaleString()}
-  </div>
+  Total Due: ৳{" "}
+  {dueStudents
+    .reduce(
+      (total, student) =>
+        total +
+        Number(student.totalDueAmount || 0),
+      0
+    )
+    .toLocaleString()}
+</div>
 </div>
 
   <div className="overflow-x-auto bg-white rounded-xl shadow">
@@ -364,28 +365,49 @@ if (loading) {
           <th>Phone</th>
           <th>Due Date</th>
           <th>Monthly Fee</th>
+          <th>Due Months</th>
           <th>Total Due Amount</th>
+          
         </tr>
       </thead>
 
       <tbody>
-        {dueStudents.map((student, index) => (
-          <tr key={student._id}>
-            <td>{index + 1}</td>
-            <td>{student.studentName}</td>
-            <td>{student.className}</td>
-            <td>{student.guardianPhone}</td>
-            <td>{student.salaryDate}</td>
-            <td className="text-red-600 font-bold">
-  ৳ {Number(student.monthlySalary || 0).toLocaleString()}
+  {dueStudents.map((student, index) => (
+    <tr key={student._id}>
+      <td>{index + 1}</td>
+
+      <td>{student.studentName}</td>
+
+      <td>{student.className}</td>
+
+      <td>{student.guardianPhone}</td>
+
+      <td>{student.salaryDate}</td>
+
+      <td className="text-red-600 font-bold">
+        ৳{" "}
+        {Number(
+          student.monthlySalary || 0
+        ).toLocaleString()}
+      </td>
+
+      <td>
+  <span className="badge badge-error">
+    {student.dueMonths} Month
+    {student.dueMonths > 1 ? "s" : ""}
+  </span>
 </td>
 
-<td className="text-red-700 font-bold">
-  ৳ {Number(student.totalDueAmount || 0).toLocaleString()}
-</td>
-          </tr>
-        ))}
-      </tbody>
+      <td className="text-red-700 font-bold">
+        ৳{" "}
+        {Number(
+          student.totalDueAmount || 0
+        ).toLocaleString()}
+      </td>
+      
+    </tr>
+  ))}
+</tbody>
     </table>
   </div>
 

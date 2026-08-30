@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase.config";
+import PasswordGate from "./PasswordGate";
 
 export default function AddMemory({ onMemoryAdded }) {
   const [user, setUser] = useState(null);
@@ -297,6 +298,7 @@ useEffect(() => {
   }
 
   return (
+    <PasswordGate>
     <div className="space-y-6">
 
       {/* =========================
@@ -783,5 +785,6 @@ useEffect(() => {
 </div>
 
     </div>
+    </PasswordGate>
   );
 }
