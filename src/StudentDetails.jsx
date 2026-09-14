@@ -16,6 +16,8 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import ExamFee from "./Admin/ExamFee";
+import SheetFee from "./Admin/SheetFee";
 
 
 export default function StudentDetails() {
@@ -489,42 +491,70 @@ const totalPaymentsAmount = payments.reduce(
 const calculateDue = () => {
   if (!student?.admissionDate) {
     return {
-      totalMonths: 0,
+      totalDueMonths: 0,
       totalFee: 0,
       totalPaid: 0,
       due: 0,
+      dueMonths: [],
     };
   }
 
   const admission = new Date(student.admissionDate);
   const today = new Date();
 
-  const totalMonths =
-    (today.getFullYear() - admission.getFullYear()) * 12 +
-    (today.getMonth() - admission.getMonth()) +
-    1;
-
   const monthlyFee = Number(student.monthlySalary || 0);
 
-  const totalFee = totalMonths * monthlyFee;
+  // Payment due day
+  const dueDay = Number(
+    student.salaryDate || admission.getDate()
+  );
 
+  // কতগুলো payment cycle ইতিমধ্যে due হয়েছে
+  let totalDueMonths =
+    (today.getFullYear() - admission.getFullYear()) * 12 +
+    (today.getMonth() - admission.getMonth());
+
+  // এই মাসের due date পার হলে current cycle add হবে
+  if (today.getDate() >= dueDay) {
+    totalDueMonths += 1;
+  }
+
+  // Admission date ভবিষ্যতের হলে
+  totalDueMonths = Math.max(totalDueMonths, 0);
+
+  // মোট due হওয়ার কথা
+  const totalFee =
+    totalDueMonths * monthlyFee;
+
+  // মোট paid amount
   const totalPaid = payments.reduce(
-    (sum, payment) => sum + Number(payment.amount || 0),
+    (sum, payment) =>
+      sum + Number(payment.amount || 0),
     0
   );
 
-  const due = Math.max(totalFee - totalPaid, 0);
+  // বাকি টাকা
+  const due = Math.max(
+    totalFee - totalPaid,
+    0
+  );
+
+  // কত মাসের টাকা বাকি
+  const dueMonthsCount =
+    monthlyFee > 0
+      ? Math.ceil(due / monthlyFee)
+      : 0;
 
   return {
-    totalMonths,
+    totalDueMonths,
     totalFee,
     totalPaid,
     due,
+    dueMonthsCount,
   };
 };
 
 const dueInfo = calculateDue();
-
 
   if (loading) return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
   if (!student) return <div>Student not found</div>;
@@ -665,8 +695,10 @@ const dueInfo = calculateDue();
       </p>
 
       <p>
-        Total Months: {dueInfo.totalMonths}
-      </p>
+    Total Due Cycles: {dueInfo.totalDueMonths}
+  </p>
+
+      
 
       <p>
         Monthly Fee: ৳{" "}
@@ -674,14 +706,23 @@ const dueInfo = calculateDue();
       </p>
 
       <p>
-        Total Fee: ৳{" "}
-        {dueInfo.totalFee.toLocaleString()}
-      </p>
+    Total Payable: ৳{" "}
+    {dueInfo.totalFee.toLocaleString()}
+  </p>
 
       <p>
         Paid: ৳{" "}
         {dueInfo.totalPaid.toLocaleString()}
       </p>
+
+      <p>
+    Due Months:{" "}
+    <span className="font-bold text-red-600">
+      {dueInfo.dueMonthsCount} Month
+      {dueInfo.dueMonthsCount !== 1 ? "s" : ""}
+    </span>
+  </p>
+  
     </div>
   </div>
 </div>
@@ -939,6 +980,24 @@ const dueInfo = calculateDue();
           </form>
         </div>
       </div>
+
+      <div className="grid lg:grid-cols-2 gap-6 mt-8">
+
+  <ExamFee
+    student={student}
+    onFeeAdded={() => {
+      console.log("Exam fee added");
+    }}
+  />
+
+  <SheetFee
+    student={student}
+    onFeeAdded={() => {
+      console.log("Sheet fee added");
+    }}
+  />
+
+</div>
 
       <div className="card bg-base-100 shadow-xl mb-8">
         <div className="card-body">
